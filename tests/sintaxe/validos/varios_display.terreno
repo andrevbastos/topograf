@@ -1,0 +1,6 @@
+// espera: display A  @5
+// espera: display A profundidade  @6
+terreno(width: 8, length: 8, height: 4);
+ruido A(semente: 1);
+display A;
+display A profundidade;

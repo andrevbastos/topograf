@@ -1,0 +1,5 @@
+// espera: linha 5: erro de execução
+// codigo: 1
+terreno(width: 4, length: 4);
+ruido A(semente: 1);
+exportar A como "/proc/nao_existe/a.png";

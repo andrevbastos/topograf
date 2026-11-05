@@ -1,0 +1,9 @@
+// espera: display (max A B)#ff8800, A#0a0b0c, B  @7
+// espera: display A#ff0000, A#808080  @8
+// espera: display A  @9
+terreno(width: 8, length: 8, height: 4);
+ruido A(semente: 1);
+ruido B(semente: 2);
+display max(A, B)#FF8800, A#0a0B0c, B;
+display A#red,A#gray;
+display A;

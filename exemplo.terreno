@@ -1,0 +1,11 @@
+terreno(width: 256, length: 256, height: 256);
+
+ruido A(frequencia: 1, oitavas: 6, semente: 28082004);
+ruido B(frequencia: 2, oitavas: 5, semente: 28082004, expoente: 2);
+
+ruido grama = A * 0.7;
+ruido montanhas = acima(B, 0.35) * 0.8;
+
+display grama#green, montanhas#white, (0.34)#cyan profundidade;
+exportar montanhas como "montanhas.png";
+exportar oitavas B em "camadas/";

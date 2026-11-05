@@ -1,0 +1,6 @@
+terreno(width: 4, length: 3);
+ruido M = 0.5;
+ruido A(semente: 1);
+exportar M como "m.png";
+exportar A como "sub/dir/a.png";
+exportar oitavas A em "oit";

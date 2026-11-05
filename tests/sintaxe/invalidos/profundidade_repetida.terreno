@@ -1,0 +1,4 @@
+// espera: linha 4, coluna 24: erro sintático: encontrado profundidade inesperado, esperado ;
+terreno(width: 8, length: 8, height: 4);
+ruido A(semente: 1);
+display A profundidade profundidade;

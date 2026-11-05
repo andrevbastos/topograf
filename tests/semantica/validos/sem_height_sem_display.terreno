@@ -1,0 +1,4 @@
+// espera: A primitivo linha 3
+terreno(width: 8, length: 8);
+ruido A(oitavas: 1);
+exportar A como "a.png";

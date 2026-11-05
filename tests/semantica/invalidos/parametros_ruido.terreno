@@ -1,0 +1,10 @@
+// espera: linha 9, coluna 9: erro semântico: parâmetro desconhecido 'escala' em ruido A
+// espera: linha 9, coluna 20: erro semântico: 'width' não pode ser definido em ruido
+// espera: linha 9, coluna 30: erro semântico: 'oitavas' deve ser >= 1 (recebeu 0)
+// espera: linha 10, coluna 9: erro semântico: 'semente' deve ser inteiro (recebeu 1.5)
+// espera: linha 10, coluna 23: erro semântico: 'frequencia' deve ser > 0 (recebeu 0)
+// espera: linha 10, coluna 38: erro semântico: 'persistencia' deve ser > 0 (recebeu 0)
+// espera: 6 erro(s) semântico(s)
+terreno(width: 8, length: 8);
+ruido A(escala: 4, width: 8, oitavas: 0);
+ruido B(semente: 1.5, frequencia: 0, persistencia: 0);

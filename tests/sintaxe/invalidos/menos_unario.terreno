@@ -1,0 +1,4 @@
+// espera: linha 4, coluna 11: erro sintático: encontrado - inesperado
+terreno(width: 8, length: 8);
+ruido A(semente: 1);
+ruido B = -A;

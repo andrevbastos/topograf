@@ -1,0 +1,6 @@
+// espera: ruido B = (* 2 A)
+// espera: ruido C = (mistura A B 1 3)
+terreno(width: 8, length: 8);
+ruido A(semente: 1);
+ruido B = (2) * A;
+ruido C = mistura(A, B, (1), 3);

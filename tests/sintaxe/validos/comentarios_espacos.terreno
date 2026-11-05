@@ -1,0 +1,11 @@
+// espera: terreno(width: 16, length: 16)
+// espera: ruido A(oitavas: 1)  @10
+// espera: exportar A como "a.png"  @11
+// comentário no início
+
+terreno (  width : 16 ,
+           length: 16 )  ;   // cabeçalho em duas linhas
+
+	// tab antes do comentário
+ruido A(oitavas: 1);
+exportar A como "a.png";
