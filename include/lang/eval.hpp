@@ -6,13 +6,13 @@
 #include <vector>
 
 #include "core/noise_gen.hpp"
+#include "runtime/prt.hpp"
 #include "lang/ast.hpp"
 #include "lang/semantic.hpp"
 
 namespace rt {
 
-// Grade width × length em ordem de linha (índice = j * width + i), valores em [0, 1].
-using Field = std::vector<float>;
+using Field = prt::Field;
 
 // Avalia ruídos sobre a grade do cabeçalho. Não depende do motor gráfico (A3).
 // Pressupõe um programa sem erros semânticos.
@@ -23,6 +23,7 @@ public:
     int width() const { return width_; }
     int length() const { return length_; }
     std::optional<int> height() const { return height_; }
+    prt::Grid grid() const { return {width_, length_, height_.value_or(0)}; }
 
     // Campo de um ruído declarado. Primitivos e compostos são calculados uma vez
     // e guardados em cache por nome (A1).
@@ -56,6 +57,12 @@ private:
 std::vector<std::string> runExports(const ast::Program& program, Evaluator& ev);
 
 // Caminho do PNG da oitava i de `name` em `dir` (D4).
-std::string octavePath(const std::string& dir, const std::string& name, int i);
+inline std::string octavePath(const std::string& dir, const std::string& name, int i) {
+    return prt::octavePath(dir, name, i);
+}
+
+// Displays do programa para prt::runDisplays; as camadas são avaliadas por `ev`
+// no processo de cada janela.
+std::vector<prt::DisplaySpec> displaySpecs(const ast::Program& program, Evaluator& ev);
 
 } // namespace rt

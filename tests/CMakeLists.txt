@@ -28,3 +28,16 @@ foreach(prog ${export_programs})
     add_test(NAME exportacao/${name}
         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_export.sh" $<TARGET_FILE:perlang> "${prog}")
 endforeach()
+
+# Compilador: o executável gerado (-o) produz os mesmos arquivos que o interpretador
+file(GLOB compile_programs
+    "${CMAKE_CURRENT_SOURCE_DIR}/compilacao/*.terreno"
+    "${CMAKE_CURRENT_SOURCE_DIR}/exportacao/*.terreno")
+foreach(prog ${compile_programs})
+    get_filename_component(name "${prog}" NAME_WE)
+    add_test(NAME compilacao/${name}
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_compile.sh" $<TARGET_FILE:perlang> "${prog}")
+endforeach()
+
+# C++ gerado (--emit-cpp)
+add_program_tests(compilacao/emit 0 --emit-cpp)

@@ -3,25 +3,32 @@
 #include <string>
 
 #include "lang/ast.hpp"
-#include "lang/display.hpp"
+#include "lang/codegen.hpp"
+#include "lang/compile.hpp"
 #include "lang/driver.hpp"
 #include "lang/eval.hpp"
 #include "lang/semantic.hpp"
+#include "runtime/prt.hpp"
 
 static int usage() {
-	std::cerr << "uso: perlang <programa> [--no-display] [--ast] [--check] [--frames N]\n"
+	std::cerr << "uso: perlang <programa> [-o saida | --emit-cpp] [--no-display] [--ast] [--check] [--frames N]\n"
+	             "  -o saida      compila o programa para o executável `saida` (não executa)\n"
+	             "  --emit-cpp    imprime o C++ gerado e encerra\n"
 	             "  --ast         imprime a AST e encerra (sem análise semântica)\n"
 	             "  --check       análise semântica e tabela de símbolos, sem executar\n"
 	             "  --no-display  executa sem abrir janelas\n"
-	             "  --frames N    fecha cada janela após N frames (testes)\n";
+	             "  --frames N    fecha cada janela após N frames (testes)\n"
+	             "sem -o nem --emit-cpp, o programa é interpretado.\n";
 	return 2;
 }
 
 int main(int argc, char** argv) {
 	std::string path;
+	std::string output;
 	bool noDisplay = false;
 	bool printAst = false;
 	bool checkOnly = false;
+	bool emitCpp = false;
 	int frames = 0;
 
 	for (int i = 1; i < argc; ++i) {
@@ -29,6 +36,8 @@ int main(int argc, char** argv) {
 		if (arg == "--no-display") noDisplay = true;
 		else if (arg == "--ast") printAst = true;
 		else if (arg == "--check") checkOnly = true;
+		else if (arg == "--emit-cpp") emitCpp = true;
+		else if (arg == "-o" && i + 1 < argc) output = argv[++i];
 		else if (arg == "--frames" && i + 1 < argc) {
 			try {
 				frames = std::stoi(argv[++i]);
@@ -37,10 +46,10 @@ int main(int argc, char** argv) {
 			}
 			if (frames <= 0) return usage();
 		}
-		else if (arg.starts_with("--") || !path.empty()) return usage();
+		else if (arg.starts_with("-") || !path.empty()) return usage();
 		else path = arg;
 	}
-	if (path.empty()) return usage();
+	if (path.empty() || (emitCpp && !output.empty())) return usage();
 
 	Driver driver;
 	if (!driver.parse(path)) {
@@ -65,20 +74,30 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	// D10: todos os exportar primeiro, display por último (a janela bloqueia).
+	// Compilador: gera C++ e, com -o, compila para um executável.
+	if (emitCpp || !output.empty()) {
+		const std::string sourceName = std::filesystem::path(path).filename().string();
+		const std::string cpp = codegen::generateCpp(driver.program, sem, sourceName);
+		if (emitCpp) {
+			std::cout << cpp;
+			return 0;
+		}
+		std::string error;
+		if (!compile::buildExecutable(cpp, output, error)) {
+			std::cerr << path << ": erro de compilação: " << error << "\n";
+			return 1;
+		}
+		return 0;
+	}
+
+	// Interpretador. D10: todos os exportar primeiro, display por último.
 	rt::Evaluator ev(driver.program, sem);
 	const auto runtimeErrors = rt::runExports(driver.program, ev);
 	for (const auto& e : runtimeErrors) std::cerr << path << ": " << e << "\n";
 
 	int displayStatus = 0;
 	if (!noDisplay) {
-		std::error_code ec;
-		const auto exeDir = std::filesystem::canonical("/proc/self/exe", ec).parent_path();
-		if (ec) {
-			std::cerr << path << ": erro de execução: não foi possível localizar o executável\n";
-			return 1;
-		}
-		displayStatus = display::runDisplays(driver.program, ev, exeDir, frames);
+		displayStatus = prt::runDisplays(ev.grid(), rt::displaySpecs(driver.program, ev), frames);
 	}
 
 	return runtimeErrors.empty() && displayStatus == 0 ? 0 : 1;

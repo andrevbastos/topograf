@@ -48,6 +48,7 @@ Prazo: fim de novembro de 2026 (cerca de 4 semanas).
 | D18 | Bison com skeleton C++ (`%language "c++"`, `api.value.type variant`) e AST em `std::unique_ptr`. |
 | D19 | Cada camada do `display` é deslocada 0,05 em y por índice (`translate`), contra z-fighting. Onde duas camadas coincidem, a posterior fica por cima. |
 | D20 | O ifcg carrega shaders de `../resources/` relativo ao cwd. O processo do `display` troca o cwd para `<dir do executável>/resources` antes de abrir a janela. |
+| D21 | Back-end: `perlang prog -o saida` traduz a AST para C++ e compila com o compilador do sistema, ligando com o runtime (`perlang_rtcore`, `perlang_display`, ifcg). Cada primitivo vira uma chamada a `generateNoiseMap`; cada composto vira um único laço sobre a grade com a expressão inteira embutida; cada camada de `display` vira uma lambda avaliada no processo da janela. Interpretador e código gerado usam as mesmas funções do runtime (`prt::add`, `prt::acima`, ...) e o código gerado é compilado com `-ffp-contract=off`, então os resultados são idênticos. Sem `-o`, o programa é interpretado. |
 
 ## 3. Requisitos funcionais
 
@@ -96,7 +97,7 @@ Prazo: fim de novembro de 2026 (cerca de 4 semanas).
 ## 4. Requisitos não funcionais
 
 - **N1.** C++20 e CMake com `find_package(BISON)` / `find_package(FLEX)`, `BISON_TARGET`, `FLEX_TARGET`, `ADD_FLEX_BISON_DEPENDENCY`.
-- **N2.** CLI: `perlang <programa>`. A flag `--no-display` pula a janela (para testes). A flag `--ast` imprime a AST e encerra (testes de sintaxe). A flag `--check` roda a análise semântica, imprime a tabela de símbolos e encerra sem executar (testes semânticos). A flag `--frames N` fecha cada janela após N frames (verificação do display sem interação).
+- **N2.** CLI: `perlang <programa>` interpreta; `perlang <programa> -o saida` compila para um executável (D21); `--emit-cpp` imprime o C++ gerado. O executável gerado aceita `--no-display` e `--frames N`. A flag `--no-display` pula a janela (para testes). A flag `--ast` imprime a AST e encerra (testes de sintaxe). A flag `--check` roda a análise semântica, imprime a tabela de símbolos e encerra sem executar (testes semânticos). A flag `--frames N` fecha cada janela após N frames (verificação do display sem interação).
 - **N3.** Suíte de testes (CTest; cada programa `.terreno` declara as saídas esperadas em linhas `// espera: <texto>`) com os programas válidos e inválidos da seção 8 do handoff, os valores da tabela de 2 pontos, e a comparação de PNGs e mensagens de erro.
 - **N4.** Documento teórico: gramática em BNF, regras de tipo, justificativa do design e limitações (item 1.1.4).
 

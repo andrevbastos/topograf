@@ -1,7 +1,5 @@
 #include "lang/eval.hpp"
 
-#include <algorithm>
-#include <filesystem>
 #include <format>
 #include <stdexcept>
 
@@ -9,12 +7,12 @@ namespace rt {
 
 namespace {
 
-float clamp01(float v) { return std::clamp(v, 0.0f, 1.0f); }
-
+// As operações vêm de prt (runtime): o interpretador e o código gerado pelo
+// compilador usam exatamente as mesmas funções.
 template <typename F>
 Field zip(const Field& a, const Field& b, F op) {
     Field out(a.size());
-    for (std::size_t i = 0; i < a.size(); ++i) out[i] = clamp01(op(a[i], b[i]));
+    for (std::size_t i = 0; i < a.size(); ++i) out[i] = op(a[i], b[i]);
     return out;
 }
 
@@ -30,9 +28,7 @@ Evaluator::Evaluator(const ast::Program& program, const sema::Result& sem)
 }
 
 perlin2D::NoiseConfig Evaluator::configFor(const ast::PrimitiveDecl& decl) const {
-    perlin2D::NoiseConfig c {};
-    c.width = width_;
-    c.height = length_;  // NoiseConfig.height = length da DSL (1.1.3)
+    perlin2D::NoiseConfig c = prt::config(grid());
     // Omitidos usam os padrões de NoiseConfig (D7).
     for (const auto& p : decl.params) {
         if (p.name == "frequencia") c.freq = static_cast<float>(p.value);
@@ -71,7 +67,7 @@ Field Evaluator::evaluate(const ast::Expr& e) {
     switch (e.kind) {
         case K::Number:
             // Número em posição de ruído vira campo constante (D9).
-            return Field(size(), clamp01(static_cast<float>(e.number)));
+            return Field(size(), prt::c01(static_cast<float>(e.number)));
 
         case K::Ref:
             return field(e.name);
@@ -80,14 +76,14 @@ Field Evaluator::evaluate(const ast::Expr& e) {
             const auto& lhs = *e.children[0];
             const auto& rhs = *e.children[1];
             switch (e.op) {
-                case '+': return zip(evaluate(lhs), evaluate(rhs), [](float a, float b) { return a + b; });
-                case '-': return zip(evaluate(lhs), evaluate(rhs), [](float a, float b) { return a - b; });
+                case '+': return zip(evaluate(lhs), evaluate(rhs), prt::add);
+                case '-': return zip(evaluate(lhs), evaluate(rhs), prt::sub);
                 case '*': {
                     // k * A: o escalar é o literal sem clamp (T7 garante um lado literal).
                     const bool leftScalar = lhs.kind == K::Number;
                     const float k = static_cast<float>(leftScalar ? lhs.number : rhs.number);
                     Field f = evaluate(leftScalar ? rhs : lhs);
-                    for (float& v : f) v = clamp01(k * v);
+                    for (float& v : f) v = prt::scale(k, v);
                     return f;
                 }
             }
@@ -98,15 +94,15 @@ Field Evaluator::evaluate(const ast::Expr& e) {
             const Field a = evaluate(*e.children[0]);
             const Field b = evaluate(*e.children[1]);
             const std::string& fn = e.name;
-            if (fn == "max") return zip(a, b, [](float x, float y) { return std::max(x, y); });
-            if (fn == "min") return zip(a, b, [](float x, float y) { return std::min(x, y); });
-            if (fn == "acima") return zip(a, b, [](float x, float y) { return x > y ? x : 0.0f; });
-            if (fn == "abaixo") return zip(a, b, [](float x, float y) { return x < y ? x : 0.0f; });
-            if (fn == "media") return zip(a, b, [](float x, float y) { return (x + y) / 2.0f; });
+            if (fn == "max") return zip(a, b, prt::max);
+            if (fn == "min") return zip(a, b, prt::min);
+            if (fn == "acima") return zip(a, b, prt::acima);
+            if (fn == "abaixo") return zip(a, b, prt::abaixo);
+            if (fn == "media") return zip(a, b, prt::media);
             if (fn == "mistura") {
                 const float na = static_cast<float>(e.children[2]->number);
                 const float nb = static_cast<float>(e.children[3]->number);
-                return zip(a, b, [=](float x, float y) { return (x * na + y * nb) / (na + nb); });
+                return zip(a, b, [=](float x, float y) { return prt::mistura(x, y, na, nb); });
             }
             throw std::logic_error("função sem avaliação: " + fn);
         }
@@ -114,39 +110,42 @@ Field Evaluator::evaluate(const ast::Expr& e) {
     throw std::logic_error("nó sem avaliação");
 }
 
-std::string octavePath(const std::string& dir, const std::string& name, int i) {
-    return (std::filesystem::path(dir) / std::format("{}_oitava_{}.png", name, i)).string();
-}
-
 std::vector<std::string> runExports(const ast::Program& program, Evaluator& ev) {
     std::vector<std::string> errors;
-
-    auto save = [&](const std::string& path, const Field& f, ast::Loc loc) {
-        try {
-            if (!perlin2D::saveNoiseAsPNG(path, f, ev.width(), ev.length())) {
-                errors.push_back(std::format("linha {}: erro de execução: não foi possível gravar '{}'", loc.line, path));
-            }
-        } catch (const std::filesystem::filesystem_error& ex) {
-            errors.push_back(std::format("linha {}: erro de execução: {}", loc.line, ex.what()));
-        }
-    };
+    const prt::Grid g = ev.grid();
 
     for (const auto& cmd : program.commands) {
         if (auto* e = std::get_if<ast::Export>(&cmd)) {
-            save(e->path, ev.field(e->name), e->loc);
+            if (auto err = prt::exportPNG(g, ev.field(e->name), e->path, e->loc.line)) errors.push_back(*err);
         } else if (auto* e = std::get_if<ast::ExportOctaves>(&cmd)) {
             for (const auto& c : program.commands) {
                 auto* p = std::get_if<ast::PrimitiveDecl>(&c);
                 if (!p || p->name != e->name) continue;
-                const auto maps = perlin2D::generateOctaveMaps(ev.configFor(*p));
-                for (std::size_t i = 0; i < maps.size(); ++i) {
-                    save(octavePath(e->dir, e->name, static_cast<int>(i)), maps[i], e->loc);
-                }
+                auto errs = prt::exportOctaves(g, ev.configFor(*p), e->dir, e->name, e->loc.line);
+                errors.insert(errors.end(), errs.begin(), errs.end());
                 break;
             }
         }
     }
     return errors;
+}
+
+std::vector<prt::DisplaySpec> displaySpecs(const ast::Program& program, Evaluator& ev) {
+    std::vector<prt::DisplaySpec> specs;
+    for (const auto& cmd : program.commands) {
+        const auto* d = std::get_if<ast::Display>(&cmd);
+        if (!d) continue;
+
+        prt::DisplaySpec spec {d->loc.line, {}, d->depth};
+        for (const auto& layer : d->layers) {
+            std::optional<prt::Rgb> color;
+            if (layer.color) color = prt::Rgb {layer.color->r, layer.color->g, layer.color->b};
+            const ast::Expr* expr = layer.expr.get();
+            spec.layers.push_back({[&ev, expr]() { return ev.evaluate(*expr); }, color});
+        }
+        specs.push_back(std::move(spec));
+    }
+    return specs;
 }
 
 } // namespace rt

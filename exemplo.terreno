@@ -6,6 +6,7 @@ ruido B(frequencia: 2, oitavas: 5, semente: 28082004, expoente: 2);
 ruido grama = A * 0.7;
 ruido montanhas = acima(B, 0.35) * 0.8;
 
-display grama#green, montanhas#white, (0.34)#cyan profundidade;
-exportar montanhas como "montanhas.png";
-exportar oitavas B em "camadas/";
+display (abaixo(B, 0.35) * 0.8)#red, montanhas#blue, (0.35 * 0.8)#white profundidade;
+display grama#green, montanhas#white, (0.35)#cyan profundidade;
+exportar montanhas como "resultados/montanhas.png";
+exportar oitavas B em "resultados/camadas/";

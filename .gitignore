@@ -6,8 +6,9 @@ build_*/
 bin/
 lib/
 out/
-results/
+resultados/
 *.o
+*.out
 *.obj
 *.a
 *.so

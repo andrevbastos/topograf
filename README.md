@@ -2,9 +2,9 @@
 
 Linguagem para compor ruídos Perlin e gerar terrenos, exportados em PNG ou exibidos em 3D.
 
-## Compilação
+## Construção do perlang
 
-Dependências: CMake ≥ 3.20, compilador com C++20, Bison ≥ 3.8, Flex ≥ 2.6, OpenGL e GLM.
+Dependências: CMake ≥ 3.20, compilador com C++20, Bison ≥ 3.8, Flex ≥ 2.6, OpenGL, GLFW e GLM.
 O motor gráfico [ifcg](https://github.com/andrevbastos/ifcg) é baixado pelo CMake.
 
 ```sh
@@ -15,14 +15,38 @@ ctest --test-dir build        # testes (opcional)
 
 O executável fica em `build/perlang`.
 
-## Execução
+## Compilar um programa
 
 ```sh
-build/perlang programa.terreno               # executa: exporta os PNGs e abre as janelas
+build/perlang programa.terreno -o programa   # gera o executável ./programa
+./programa                                   # exporta os PNGs e abre as janelas
+./programa --no-display                      # só exporta
+./programa --frames 120                      # fecha cada janela após 120 frames
+```
+
+O perlang traduz o programa para C++ e o compila com o compilador do sistema, ligando com
+o runtime do perlang. Para ver o C++ gerado, sem compilar:
+
+```sh
+build/perlang programa.terreno --emit-cpp
+```
+
+O compilador usado é o mesmo do build do perlang; a variável `CXX` o substitui.
+O runtime do perlang é ligado estaticamente; o executável só precisa das bibliotecas do
+sistema (GLFW, OpenGL). Para o `display`, ele procura os shaders do ifcg em `resources/` ao
+lado do executável e, se não houver, em `build/resources`. Para usar o executável em outro
+lugar sem o `build/`, copie `build/resources` para junto dele.
+
+## Interpretar um programa
+
+```sh
+build/perlang programa.terreno               # executa direto, sem gerar executável
 build/perlang programa.terreno --no-display  # executa sem abrir janelas
 build/perlang programa.terreno --check       # só valida e mostra os ruídos declarados
 build/perlang programa.terreno --ast         # só mostra a árvore sintática
 ```
+
+Interpretado ou compilado, o programa produz exatamente os mesmos arquivos.
 
 Os caminhos dos arquivos exportados são relativos ao diretório onde o comando é executado.
 Cada `display` abre a sua própria janela, e todas abrem ao mesmo tempo. Para fechar uma
@@ -44,8 +68,8 @@ ruido montanhas = acima(B, 0.35) * 0.8;
 
 // exibição e exportação
 display grama#green, montanhas#white, (0.34)#cyan profundidade;
-exportar montanhas como "montanhas.png";
-exportar oitavas B em "camadas/";
+exportar montanhas como "resultados/montanhas.png";
+exportar oitavas B em "resultados/camadas/";
 ```
 
 ## Regras de escrita
@@ -134,8 +158,8 @@ Todo valor fica em [0, 1]. Cada operação é feita ponto a ponto e limitada a e
 ### `display`
 
 ```
-display A;                                    // cinza
-display A#red, B#0000FF;                      // uma camada por expressão
+display A;                                             // cinza
+display A#red, B#0000FF;                               // uma camada por expressão
 display A#green, acima(A, 0.6)#white profundidade;
 ```
 

@@ -1,4 +1,4 @@
-#include "lang/display.hpp"
+#include "runtime/prt.hpp"
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <format>
 #include <iostream>
 #include <memory>
@@ -18,9 +19,13 @@
 
 #include "core/marching_cubes.hpp"
 
+#ifndef PERLANG_RESOURCES_DIR
+#define PERLANG_RESOURCES_DIR ""
+#endif
+
 namespace fs = std::filesystem;
 
-namespace display {
+namespace prt {
 
 namespace {
 
@@ -29,39 +34,50 @@ constexpr float LAYER_OFFSET = 0.05f;
 
 const Color GRAY {0.5f, 0.5f, 0.5f, 1.0f};
 
-Color toColor(const std::optional<ast::Rgb>& rgb) {
+Color toColor(const std::optional<Rgb>& rgb) {
     if (!rgb) return GRAY;
     return {rgb->r / 255.0f, rgb->g / 255.0f, rgb->b / 255.0f, 1.0f};
 }
 
+// Recursos do ifcg (shaders): ao lado do executável ou, senão, no diretório do build
+// em que o runtime foi compilado (executáveis gerados pelo compilador).
+std::optional<fs::path> resourcesDir() {
+    std::error_code ec;
+    const auto exe = fs::canonical("/proc/self/exe", ec);
+    if (!ec && fs::is_directory(exe.parent_path() / "resources")) return exe.parent_path() / "resources";
+    const fs::path baked {PERLANG_RESOURCES_DIR};
+    if (!baked.empty() && fs::is_directory(baked)) return baked;
+    return std::nullopt;
+}
+
 // Corpo do processo filho: uma janela para um `display`. Retorna o código de saída.
-int showOne(const ast::Display& d, rt::Evaluator& ev, const fs::path& exeDir, int frames) {
-    const int W = ev.width();
-    const int L = ev.length();
-    const int H = ev.height().value_or(0);  // T11 garante height
+int showOne(const Grid& g, const DisplaySpec& d, int frames) {
+    const int W = g.width;
+    const int L = g.length;
+    const int H = g.height;
 
     // Malhas de cada camada (CPU), antes de abrir a janela (D1, D8).
     std::vector<std::pair<std::vector<Vertex>, std::vector<GLuint>>> layers;
     for (std::size_t i = 0; i < d.layers.size(); ++i) {
-        const rt::Field field = ev.evaluate(*d.layers[i].expr);
+        const Field field = d.layers[i].field();
         auto data = getMarchingCubeData(field, W, H, L, toColor(d.layers[i].color), d.depth);
         if (data.first.empty()) {
             std::cerr << std::format("display linha {}: camada {} sem malha "
-                                     "(width, length e height precisam ser >= 2)\n", d.loc.line, i + 1);
+                                     "(width, length e height precisam ser >= 2)\n", d.line, i + 1);
         }
         layers.push_back(std::move(data));
     }
 
     // O ifcg carrega os shaders de "../resources/..." relativo ao cwd (D20).
+    const auto res = resourcesDir();
     std::error_code ec;
-    fs::current_path(exeDir / "resources", ec);
-    if (ec) {
-        std::cerr << std::format("display linha {}: erro de execução: recursos do ifcg não encontrados em '{}'\n",
-                                 d.loc.line, (exeDir / "resources").string());
+    if (res) fs::current_path(*res, ec);
+    if (!res || ec) {
+        std::cerr << std::format("display linha {}: erro de execução: recursos do ifcg (shaders) não encontrados\n", d.line);
         return 1;
     }
 
-    const std::string title = std::format("perlang — display linha {}", d.loc.line);
+    const std::string title = std::format("perlang — display linha {}", d.line);
     Engine::init(1200, 800, title.c_str());
     Engine::setup3D();
 
@@ -108,14 +124,11 @@ int showOne(const ast::Display& d, rt::Evaluator& ev, const fs::path& exeDir, in
 
 } // namespace
 
-int runDisplays(const ast::Program& program, rt::Evaluator& ev, const fs::path& exeDir, int frames) {
+int runDisplays(const Grid& g, const std::vector<DisplaySpec>& displays, int frames) {
     std::vector<std::pair<pid_t, int>> children;  // pid, linha do display
     int status = 0;
 
-    for (const auto& cmd : program.commands) {
-        const auto* d = std::get_if<ast::Display>(&cmd);
-        if (!d) continue;
-
+    for (const auto& d : displays) {
         std::fflush(stdout);
         std::fflush(stderr);
         std::cout.flush();
@@ -124,22 +137,22 @@ int runDisplays(const ast::Program& program, rt::Evaluator& ev, const fs::path& 
         const pid_t pid = fork();
         if (pid < 0) {
             std::cerr << std::format("display linha {}: erro de execução: fork falhou ({})\n",
-                                     d->loc.line, std::strerror(errno));
+                                     d.line, std::strerror(errno));
             status = 1;
             continue;
         }
         if (pid == 0) {
             int rc = 1;
             try {
-                rc = showOne(*d, ev, exeDir, frames);
+                rc = showOne(g, d, frames);
             } catch (const std::exception& ex) {
-                std::cerr << std::format("display linha {}: erro de execução: {}\n", d->loc.line, ex.what());
+                std::cerr << std::format("display linha {}: erro de execução: {}\n", d.line, ex.what());
             }
             std::cout.flush();
             std::cerr.flush();
             _exit(rc);  // não roda destrutores estáticos herdados do pai
         }
-        children.emplace_back(pid, d->loc.line);
+        children.emplace_back(pid, d.line);
     }
 
     for (const auto& [pid, line] : children) {
@@ -157,4 +170,4 @@ int runDisplays(const ast::Program& program, rt::Evaluator& ev, const fs::path& 
     return status;
 }
 
-} // namespace display
+} // namespace prt
