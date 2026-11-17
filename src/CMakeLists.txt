@@ -10,20 +10,20 @@ endif()
 # ---------------------------------------------------------------------------
 
 # Núcleo sem motor gráfico: operações, Perlin, PNG, opções de linha de comando
-add_library(perlang_rtcore STATIC
+add_library(topograf_rtcore STATIC
     runtime/prt.cpp
     stb_impl.cpp
 )
-target_include_directories(perlang_rtcore PUBLIC "${PROJECT_SOURCE_DIR}/include")
-set_target_properties(perlang_rtcore PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(topograf_rtcore PUBLIC "${PROJECT_SOURCE_DIR}/include")
+set_target_properties(topograf_rtcore PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Display com ifcg (D1, D15, D19, D20)
-add_library(perlang_display STATIC runtime/display.cpp)
-target_link_libraries(perlang_display PUBLIC perlang_rtcore ifcg_core)
+add_library(topograf_display STATIC runtime/display.cpp)
+target_link_libraries(topograf_display PUBLIC topograf_rtcore ifcg_core)
 # Shaders do ifcg para executáveis gerados fora do diretório do build (D20)
-target_compile_definitions(perlang_display PRIVATE
-    PERLANG_RESOURCES_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources")
-set_target_properties(perlang_display PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(topograf_display PRIVATE
+    TOPOGRAF_RESOURCES_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources")
+set_target_properties(topograf_display PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # ---------------------------------------------------------------------------
 # Front-end e back-end da linguagem
@@ -37,7 +37,7 @@ FLEX_TARGET(Lexer lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
 
 # Análise, avaliação e geração de código, sem motor gráfico (A3)
-add_library(perlang_lang STATIC
+add_library(topograf_lang STATIC
     driver.cpp
     ast_dump.cpp
     semantic.cpp
@@ -46,31 +46,31 @@ add_library(perlang_lang STATIC
     ${BISON_Parser_OUTPUTS}
     ${FLEX_Lexer_OUTPUTS}
 )
-target_include_directories(perlang_lang PUBLIC
+target_include_directories(topograf_lang PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
-target_link_libraries(perlang_lang PUBLIC perlang_rtcore)
+target_link_libraries(topograf_lang PUBLIC topograf_rtcore)
 
 # Caminhos usados pelo compilador ao gerar executáveis (-o)
 file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/build_config.hpp" CONTENT
 "#pragma once
-// Gerado pelo CMake. Caminhos usados por `perlang -o` para compilar o C++ gerado.
-#define PERLANG_CXX \"${CMAKE_CXX_COMPILER}\"
-#define PERLANG_INCLUDE_DIR \"${PROJECT_SOURCE_DIR}/include\"
-static const char* const PERLANG_LINK_LIBS[] = {
-    \"$<TARGET_FILE:perlang_display>\",
-    \"$<TARGET_FILE:perlang_rtcore>\",
+// Gerado pelo CMake. Caminhos usados por `topograf -o` para compilar o C++ gerado.
+#define TOPOGRAF_CXX \"${CMAKE_CXX_COMPILER}\"
+#define TOPOGRAF_INCLUDE_DIR \"${PROJECT_SOURCE_DIR}/include\"
+static const char* const TOPOGRAF_LINK_LIBS[] = {
+    \"$<TARGET_FILE:topograf_display>\",
+    \"$<TARGET_FILE:topograf_rtcore>\",
     \"$<TARGET_FILE:ifcg_core>\",
     \"-lglfw\", \"-lGL\", \"-pthread\",
 };
 ")
 
-add_executable(perlang main.cpp compile.cpp)
-target_link_libraries(perlang PRIVATE perlang_lang perlang_display)
+add_executable(topograf main.cpp compile.cpp)
+target_link_libraries(topograf PRIVATE topograf_lang topograf_display)
 
 # Copia recursos da engine ifcg para o diretório do executável (shaders)
-add_custom_command(TARGET perlang POST_BUILD
+add_custom_command(TARGET topograf POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${ifcg_SOURCE_DIR}/resources $<TARGET_FILE_DIR:perlang>/resources
+    ${ifcg_SOURCE_DIR}/resources $<TARGET_FILE_DIR:topograf>/resources
 )

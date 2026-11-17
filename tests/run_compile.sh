@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# uso: run_compile.sh <perlang> <programa>
+# uso: run_compile.sh <topograf> <programa>
 # Compila o programa (-o), roda o executável e o interpretador com --no-display em
 # diretórios separados e exige: mesmo código de saída e arquivos idênticos byte a byte.
 # Linhas "// espera: <texto>" também são procuradas na saída do executável.
 set -u
-perlang=$1; prog=$(realpath "$2")
+topograf=$1; prog=$(realpath "$2")
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/compilado" "$tmp/interpretado"
 status=0
 
-if ! "$perlang" "$prog" -o "$tmp/prog" > "$tmp/compilacao.txt" 2>&1; then
+if ! "$topograf" "$prog" -o "$tmp/prog" > "$tmp/compilacao.txt" 2>&1; then
     echo "FALHA: compilação"; cat "$tmp/compilacao.txt"; exit 1
 fi
 
 out=$(cd "$tmp/compilado" && "$tmp/prog" --no-display 2>&1); rc_c=$?
-(cd "$tmp/interpretado" && "$perlang" "$prog" --no-display > /dev/null 2>&1); rc_i=$?
+(cd "$tmp/interpretado" && "$topograf" "$prog" --no-display > /dev/null 2>&1); rc_i=$?
 
 [ "$rc_c" -eq "$rc_i" ] || { echo "FALHA: código $rc_c (compilado) != $rc_i (interpretado)"; status=1; }
 

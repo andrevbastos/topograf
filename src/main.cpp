@@ -11,7 +11,7 @@
 #include "runtime/prt.hpp"
 
 static int usage() {
-	std::cerr << "uso: perlang <programa> [-o saida | --emit-cpp] [--no-display] [--ast] [--check] [--frames N]\n"
+	std::cerr << "uso: topograf <programa> [-o saida | --emit-cpp] [--no-display] [--ast] [--check] [--frames N]\n"
 	             "  -o saida      compila o programa para o executável `saida` (não executa)\n"
 	             "  --emit-cpp    imprime o C++ gerado e encerra\n"
 	             "  --ast         imprime a AST e encerra (sem análise semântica)\n"

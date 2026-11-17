@@ -1,0 +1,17 @@
+@startuml
+skinparam dpi 300
+start
+:Programa <arquivo>.terreno;
+:Flex;
+:Bison 
+(AST);
+:Análise semântica;
+if (flag '-o'?) then (sim)
+:Gerador de C++;
+:Compilador C++;
+else
+:Interpretador;
+endif
+:PNG e janelas 3D;
+end
+@enduml

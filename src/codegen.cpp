@@ -90,7 +90,7 @@ std::string generateCpp(const ast::Program& program, const sema::Result& /*sem*/
     }
 
     std::ostringstream out;
-    out << "// Gerado por perlang a partir de " << str(sourceName) << ". Não editar.\n"
+    out << "// Gerado por topograf a partir de " << str(sourceName) << ". Não editar.\n"
         << "#include <iostream>\n"
         << "#include <string>\n"
         << "#include <vector>\n\n"

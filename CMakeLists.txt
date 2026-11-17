@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
-project(perlang VERSION 1.0.0 LANGUAGES C CXX)
+project(topograf VERSION 1.0.0 LANGUAGES C CXX)
 
 # Configurações globais
 set(CMAKE_CXX_STANDARD 20)

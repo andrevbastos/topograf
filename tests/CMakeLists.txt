@@ -6,7 +6,7 @@ function(add_program_tests dir expected_rc)
         file(RELATIVE_PATH name "${CMAKE_CURRENT_SOURCE_DIR}" "${prog}")
         string(REPLACE ".terreno" "" name "${name}")
         add_test(NAME ${name}
-            COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_test.sh" $<TARGET_FILE:perlang> "${prog}" ${expected_rc} ${ARGN})
+            COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_test.sh" $<TARGET_FILE:topograf> "${prog}" ${expected_rc} ${ARGN})
     endforeach()
 endfunction()
 
@@ -17,7 +17,7 @@ add_program_tests(semantica/invalidos 1 --check)
 
 # Avaliação e exportação, sem janela (A3)
 add_executable(eval_test eval_test.cpp)
-target_link_libraries(eval_test PRIVATE perlang_lang)
+target_link_libraries(eval_test PRIVATE topograf_lang)
 add_test(NAME avaliacao/eval_test
     COMMAND eval_test "${CMAKE_CURRENT_SOURCE_DIR}/avaliacao" "${CMAKE_CURRENT_BINARY_DIR}/tmp_eval")
 
@@ -26,7 +26,7 @@ file(GLOB export_programs "${CMAKE_CURRENT_SOURCE_DIR}/exportacao/*.terreno")
 foreach(prog ${export_programs})
     get_filename_component(name "${prog}" NAME_WE)
     add_test(NAME exportacao/${name}
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_export.sh" $<TARGET_FILE:perlang> "${prog}")
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_export.sh" $<TARGET_FILE:topograf> "${prog}")
 endforeach()
 
 # Compilador: o executável gerado (-o) produz os mesmos arquivos que o interpretador
@@ -36,7 +36,7 @@ file(GLOB compile_programs
 foreach(prog ${compile_programs})
     get_filename_component(name "${prog}" NAME_WE)
     add_test(NAME compilacao/${name}
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_compile.sh" $<TARGET_FILE:perlang> "${prog}")
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/run_compile.sh" $<TARGET_FILE:topograf> "${prog}")
 endforeach()
 
 # C++ gerado (--emit-cpp)

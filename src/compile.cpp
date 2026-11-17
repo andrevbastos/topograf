@@ -39,7 +39,7 @@ int run(const std::vector<std::string>& args) {
 } // namespace
 
 bool buildExecutable(const std::string& cppSource, const std::string& output, std::string& error) {
-    const fs::path cppFile = fs::temp_directory_path() / std::format("perlang-{}.cpp", getpid());
+    const fs::path cppFile = fs::temp_directory_path() / std::format("topograf-{}.cpp", getpid());
     {
         std::ofstream f(cppFile);
         f << cppSource;
@@ -49,18 +49,18 @@ bool buildExecutable(const std::string& cppSource, const std::string& output, st
         }
     }
 
-    // CXX no ambiente substitui o compilador usado no build do perlang.
+    // CXX no ambiente substitui o compilador usado no build do topograf.
     const char* envCxx = std::getenv("CXX");
     std::vector<std::string> args {
-        envCxx && *envCxx ? envCxx : PERLANG_CXX,
+        envCxx && *envCxx ? envCxx : TOPOGRAF_CXX,
         "-std=c++20", "-O2",
         "-ffp-contract=off",  // sem FMA: mesmo resultado em float que o interpretador
         "-w",                 // avisos de cabeçalhos de terceiros não interessam ao usuário
-        "-I", PERLANG_INCLUDE_DIR,
+        "-I", TOPOGRAF_INCLUDE_DIR,
         cppFile.string(),
         "-o", output,
     };
-    for (const char* lib : PERLANG_LINK_LIBS) args.emplace_back(lib);
+    for (const char* lib : TOPOGRAF_LINK_LIBS) args.emplace_back(lib);
 
     const int rc = run(args);
     fs::remove(cppFile);

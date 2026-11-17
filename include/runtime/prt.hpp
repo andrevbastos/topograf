@@ -1,8 +1,8 @@
 #pragma once
 
-// Runtime do perlang: usado pelo interpretador e pelos executáveis gerados pelo
-// compilador (`perlang prog.terreno -o prog`). Não inclui o ifcg; o display fica
-// em perlang_display.
+// Runtime do topograf: usado pelo interpretador e pelos executáveis gerados pelo
+// compilador (`topograf prog.terreno -o prog`). Não inclui o ifcg; o display fica
+// em topograf_display.
 
 #include <algorithm>
 #include <cstddef>
@@ -59,7 +59,7 @@ std::vector<std::string> exportOctaves(const Grid& g, const perlin2D::NoiseConfi
                                        const std::string& dir, const std::string& name, int line);
 std::string octavePath(const std::string& dir, const std::string& name, int i);
 
-// ---------- display (implementado em perlang_display, que liga o ifcg) ----------
+// ---------- display (implementado em topograf_display, que liga o ifcg) ----------
 
 struct Rgb {
     std::uint8_t r = 0, g = 0, b = 0;

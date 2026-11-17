@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# uso: run_export.sh <perlang> <programa>
+# uso: run_export.sh <topograf> <programa>
 # Roda o programa com --no-display num diretório temporário e confere:
 #   // arquivo: <caminho> <W>x<H>   PNG em cinza gerado com essas dimensões
 #   // sem-arquivo: <caminho>       arquivo que não pode existir
 #   // espera: <texto>              texto na saída
 #   // codigo: <n>                  código de saída esperado (padrão 0)
 set -u
-perlang=$1; prog=$(realpath "$2")
+topograf=$1; prog=$(realpath "$2")
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 cd "$tmp"
 
-out=$("$perlang" --no-display "$prog" 2>&1); rc=$?
+out=$("$topograf" --no-display "$prog" 2>&1); rc=$?
 expected_rc=$(sed -n 's|^// codigo: ||p' "$prog"); expected_rc=${expected_rc:-0}
 status=0
 

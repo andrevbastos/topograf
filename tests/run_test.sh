@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# uso: run_test.sh <perlang> <programa> <código de saída esperado> [flags do perlang...]
+# uso: run_test.sh <topograf> <programa> <código de saída esperado> [flags do topograf...]
 # Cada linha "// espera: <texto>" do programa deve aparecer na saída (stdout + stderr).
 set -u
-perlang=$1; prog=$2; expected_rc=$3; shift 3
+topograf=$1; prog=$2; expected_rc=$3; shift 3
 
-out=$("$perlang" "$@" "$prog" 2>&1); rc=$?
+out=$("$topograf" "$@" "$prog" 2>&1); rc=$?
 status=0
 
 if [ "$rc" -ne "$expected_rc" ]; then

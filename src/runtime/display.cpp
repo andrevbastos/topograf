@@ -19,8 +19,8 @@
 
 #include "core/marching_cubes.hpp"
 
-#ifndef PERLANG_RESOURCES_DIR
-#define PERLANG_RESOURCES_DIR ""
+#ifndef TOPOGRAF_RESOURCES_DIR
+#define TOPOGRAF_RESOURCES_DIR ""
 #endif
 
 namespace fs = std::filesystem;
@@ -45,7 +45,7 @@ std::optional<fs::path> resourcesDir() {
     std::error_code ec;
     const auto exe = fs::canonical("/proc/self/exe", ec);
     if (!ec && fs::is_directory(exe.parent_path() / "resources")) return exe.parent_path() / "resources";
-    const fs::path baked {PERLANG_RESOURCES_DIR};
+    const fs::path baked {TOPOGRAF_RESOURCES_DIR};
     if (!baked.empty() && fs::is_directory(baked)) return baked;
     return std::nullopt;
 }
@@ -77,7 +77,7 @@ int showOne(const Grid& g, const DisplaySpec& d, int frames) {
         return 1;
     }
 
-    const std::string title = std::format("perlang — display linha {}", d.line);
+    const std::string title = std::format("TopografDSL — display linha {}", d.line);
     Engine::init(1200, 800, title.c_str());
     Engine::setup3D();
 
