@@ -163,8 +163,8 @@ grayscale images or displayed in 3D. Every noise field takes values in
 $[0,1]$ and every operator preserves this interval, while a semantic
 analysis rejects compositions without meaning in the domain, such as
 the product of two noise fields, and reports all errors at once. The
-compiler, built with Flex and Bison, offers two back-ends that share
-the same runtime: an interpreter and a translator to C++. The 3D view
+translator, built with Flex and Bison, offers two back-ends that share
+the same runtime: an interpreter and a C++ code generator. The 3D view
 converts each layer into a mesh with Marching Cubes. A suite of 40
 automated tests passes, including tests in which the interpreter and
 the generated executable produce byte-identical files.
@@ -184,11 +184,14 @@ Terrenos fazem parte de muitas aplicações de computação gráfica que
 representam ambientes abertos, como jogos e simulações. Em jogos, mapas
 inteiros podem ser gerados por funções de ruído em vez de desenhados à
 mão~\cite{patel_terrain_noise}. Modelar manualmente grandes extensões de
-relevo é um trabalho lento e difícil de variar, e a geração procedural
-contorna esse custo produzindo o terreno a partir de algoritmos e de
-poucos parâmetros.
+relevo é um trabalho lento, e cada novo terreno, ou cada variação de um
+existente, com outros picos ou outras alturas, precisa ser refeito à
+mão. A geração procedural contorna esse custo produzindo o terreno a
+partir de algoritmos e de poucos parâmetros, que podem ser alterados
+para obter um relevo diferente.
 
-Uma técnica comum é o ruído de gradiente proposto por
+Uma técnica comum de geração procedural de terrenos é o ruído de
+gradiente proposto por
 Perlin~\cite{perlin1985image}, somado em várias camadas, ou oitavas,
 cada uma com frequência maior e amplitude menor que a
 anterior~\cite{patel_terrain_noise}. O resultado é um mapa de altura
@@ -205,11 +208,25 @@ implementação, e erros de composição, como um valor que excede o
 intervalo do mapa de altura, só são percebidos ao observar o terreno
 gerado.
 
+Ferramentas existentes tratam esse problema de outras formas. Editores
+de terreno como World Machine~\cite{worldmachine} e Gaea~\cite{gaea}
+representam a composição como um grafo de nós editado visualmente, e
+bibliotecas como a libnoise~\cite{libnoise} oferecem módulos de ruído
+que se combinam em código C++. Na literatura, Smelik et
+al.~\cite{smelik2014survey} destacam o grau de controle intuitivo
+oferecido ao usuário como critério central dos métodos procedurais, e
+Galin et al.~\cite{galin2019review} classificam a modelagem de terrenos
+em métodos procedurais, de simulação física e baseados em exemplos. A
+Topograf pertence ao primeiro grupo e fica entre as duas formas de uso:
+a composição é escrita como texto, como na biblioteca, mas em uma
+linguagem própria do domínio, verificada antes da execução.
+
 Este trabalho apresenta a Topograf\footnote{Código-fonte disponível em \anonfinal{endereço omitido para avaliação cega}{\url{https://github.com/andrevbastos/topograf}}.}, uma linguagem de domínio específico
 (DSL) textual para declarar ruídos Perlin, compô-los ponto a ponto e
 produzir terrenos, exportados como imagens ou visualizados em 3D. Um
 programa Topograf tem poucas linhas, é verificado antes da execução e,
-para as mesmas sementes, produz sempre o mesmo resultado. A linguagem
+para as mesmas sementes, produz sempre o mesmo resultado na mesma
+plataforma. A linguagem
 foi desenvolvida como projeto final de uma disciplina de Compiladores e
 cobre todas as fases clássicas, da análise léxica à geração de código.
 As principais contribuições são:
@@ -219,16 +236,19 @@ As principais contribuições são:
   \item uma análise semântica que rejeita operações sem significado no
         domínio, como o produto entre dois ruídos, e reporta todos os
         erros de uma vez;
-  \item dois \textit{back-ends} com resultados idênticos: um
-        interpretador e um tradutor para C++ que gera executáveis;
-  \item um gerador de terrenos que converte cada camada em uma malha por
-        Marching Cubes, com cor e sombreamento por altura.
+  \item dois \textit{back-ends}, um interpretador e um tradutor para
+        C++ que gera executáveis, que compartilham o mesmo
+        \textit{runtime} e cujos resultados foram verificados como
+        idênticos byte a byte em três programas de teste;
+  \item um gerador de terrenos que converte cada camada em uma malha de
+        triângulos pelo algoritmo Marching Cubes
+        (Seção~\ref{sec:mc}), com cor e sombreamento por altura.
 \end{itemize}
 
 O restante do artigo está organizado da seguinte forma. A
 Seção~\ref{sec:fundamentacao} apresenta os conceitos de terreno e mapa
 de altura, o ruído Perlin, a extração de malhas a partir de volumes e a
-estrutura de um compilador. A
+estrutura de um tradutor. A
 Seção~\ref{sec:linguagem} descreve a sintaxe e a semântica da Topograf, e
 a Seção~\ref{sec:implementacao}, sua implementação. A
 Seção~\ref{sec:resultados} mostra os terrenos gerados e a validação, a
@@ -266,7 +286,7 @@ o ponto:
   \label{eq:produto}
 \end{equation}
 As quatro contribuições são interpoladas com o peso suavizado
-$S(t) = 6t^5 - 15t^4 + 10t^3$, cujas primeira e segunda derivadas se
+$S(t) = 6t^5 - 15t^4 + 10t^3$~\cite{perlin2002improving}, cujas primeira e segunda derivadas se
 anulam nas bordas da célula, o que evita mudanças bruscas de inclinação
 no relevo. Na Topograf, o gradiente de cada vértice vem de uma função de
 \textit{hash} das coordenadas e da semente~\cite{zipped_perlin_noise}, de
@@ -300,8 +320,9 @@ ponto da grade, o valor que os ruídos primitivos da linguagem assumem.
 \subsection{De mapas de altura a malhas}\label{sec:mc}
 Para exibir um mapa de altura em 3D, a Topograf o converte primeiro em um volume de
 \textit{voxels}, as unidades cúbicas de uma grade tridimensional
-regular, cada uma marcada como preenchida ou vazia. Cada coluna $(x,z)$
-é preenchida da base até a altura do mapa naquele ponto, arredondada
+regular, cada uma marcada como preenchida ou vazia. Na malha, $y$ é o
+eixo vertical, e o ponto $(x,y)$ do mapa corresponde à coluna $(x,z)$
+do volume. Cada coluna é preenchida da base até a altura do mapa naquele ponto, arredondada
 para um número inteiro de \textit{voxels}. Como o volume vem de um mapa
 de altura, ele não contém cavidades nem estruturas sobrepostas.
 
@@ -329,8 +350,9 @@ Marching Cubes. O Transvoxel também define células de transição entre
 níveis de detalhe diferentes, mas, como o volume é extraído em uma única
 resolução, elas não são necessárias.
 
-\subsection{Estrutura de um compilador}\label{sec:compiladores}
-Um compilador pode ser dividido em duas fases: a análise
+\subsection{Estrutura de um tradutor}\label{sec:compiladores}
+Um tradutor, seja um compilador ou um interpretador, pode ser dividido
+em duas fases: a análise
 (\textit{front-end}), que lida com a linguagem de origem, e a síntese
 (\textit{back-end}), que produz o resultado na linguagem
 alvo. A análise é composta por três etapas. Na análise
@@ -373,7 +395,11 @@ grade, operações entre ruídos nunca envolvem dimensões diferentes.
 
 As linhas 3 e 4 declaram, com \texttt{perlin}, ruídos primitivos, cada um um gerador Perlin
 configurado por parâmetros nomeados, que correspondem aos da
-Seção~\ref{sec:perlin}; os omitidos assumem valores padrão. As linhas 6
+Seção~\ref{sec:perlin}; os omitidos assumem valores padrão, que são
+4 para \texttt{frequency}, 2 para \texttt{lacunarity}, $0{,}5$ para
+\texttt{persistence}, 3 para \texttt{octaves}, 1 para
+\texttt{amplitude} e \texttt{exponent}, 250 para \texttt{wave} e 0
+para \texttt{seed}. As linhas 6
 e 7 declaram, com \texttt{noise}, ruídos compostos, definidos por expressões sobre ruídos já
 declarados: \texttt{grama} é \texttt{A} com a altura reduzida a 70\%, e
 \texttt{montanhas} mantém apenas os pontos de \texttt{B} acima de
@@ -405,8 +431,8 @@ export octaves B to "resultados/camadas/";
 A Listagem~\ref{lst:gramatica} resume a gramática na notação do Bison.
 Um programa é o cabeçalho seguido de zero ou mais comandos, e a
 gramática impõe que \texttt{terrain} venha primeiro e apareça uma única
-vez. As funções embutidas (\texttt{max}, \texttt{above},
-\texttt{mix} etc.) não têm produções próprias: todas são reconhecidas
+vez. As funções embutidas, como \texttt{max}, \texttt{above} e
+\texttt{mix}, não têm produções próprias: todas são reconhecidas
 pela regra geral \texttt{IDENT '(' args ')'}, e a análise semântica
 confere o nome e a aridade. Assim, acrescentar uma função não altera a
 gramática.
@@ -461,7 +487,9 @@ $[0,1]$ a cada ponto da grade. A distinção entre eles é feita já pela
 sintaxe e só importa em \texttt{export octaves}, que exige um
 primitivo, pois só ele tem oitavas.
 
-Todas as operações são ponto a ponto: o valor em $(i,j)$ depende apenas
+Todas as operações são ponto a ponto: sendo $(i,j)$ o índice de um
+ponto da grade de \texttt{width} $\times$ \texttt{length}, o valor em
+$(i,j)$ depende apenas
 dos valores dos operandos em $(i,j)$. A Tabela~\ref{tab:operadores}
 lista os operadores. Todo resultado é limitado a $[0,1]$, de modo que os
 campos são fechados sob todas as operações: qualquer expressão aceita
@@ -479,8 +507,11 @@ as seguintes regras:
   \item todo nome é declarado antes do uso, uma única vez, e não
         coincide com o de uma função embutida;
   \item os parâmetros de \texttt{terrain} e dos primitivos existem, não
-        se repetem e respeitam seus domínios, como \texttt{octaves}
-        inteiro e maior ou igual a 1;
+        se repetem e respeitam seus domínios: as dimensões e
+        \texttt{wave} são inteiros positivos, \texttt{octaves} é inteiro
+        e maior ou igual a 1, \texttt{seed} é inteiro e os demais são
+        positivos; como a gramática não tem sinal negativo, valores
+        negativos já são rejeitados na análise sintática;
   \item no produto, ao menos um lado é um literal numérico, o que
         exclui ruído $\times$ ruído, e a divisão é sempre rejeitada;
   \item cada função recebe o número correto de argumentos e, em
@@ -556,7 +587,7 @@ a biblioteca \texttt{stb\_image\_write}, e a visualização usa o motor
 gráfico IFCG, construído sobre OpenGL, GLFW e GLM
 (Seção~\ref{sec:gerador}).
 
-\subsection{Arquitetura do compilador}\label{sec:arquitetura}
+\subsection{Arquitetura do tradutor}\label{sec:arquitetura}
 A Figura~\ref{fig:pipeline} mostra o fluxo. O \textit{scanner} gerado
 pelo Flex entrega os \textit{tokens} ao \textit{parser} gerado pelo
 Bison, que usa o esqueleto em C++ e constrói a AST com nós alocados em
@@ -577,10 +608,15 @@ nos testes.
 \end{figure}
 
 \subsection{Avaliação e geração de código}\label{sec:avaliacao}
-O interpretador avalia os ruídos sob demanda e guarda cada um em
-\textit{cache} pelo nome, de modo que cada primitivo é gerado uma única
-vez. Um composto é avaliado nó a nó: cada nó da expressão produz um
-campo inteiro, combinado ponto a ponto com os demais. O gerador de
+O interpretador percorre a AST diretamente, sem gerar código. Ele
+executa os comandos de saída e avalia apenas os ruídos que eles usam,
+sob demanda: ao encontrar um nome, gera o primitivo ou avalia a
+expressão do composto e guarda o campo em \textit{cache}, de modo que
+cada ruído é calculado uma única vez, mesmo que apareça em várias
+expressões. A avaliação de uma expressão é recursiva, e cada nó produz
+um campo inteiro: um literal vira campo constante, e um operador combina
+ponto a ponto os campos dos filhos com a função correspondente do
+\textit{runtime}. O gerador de
 código, em vez disso, traduz cada primitivo em uma chamada ao gerador
 de ruído e cada composto em um único laço sobre a grade, com a
 expressão inteira embutida, sem campos intermediários. Para
