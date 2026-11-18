@@ -1,0 +1,20 @@
+// arquivo: terreno.png 256x256
+// arquivo: camadas/montanhao_octave_0.png 256x256
+// arquivo: camadas/montanhao_octave_1.png 256x256
+// sem-arquivo: camadas/montanhao_octave_2.png
+// Exemplo completo do handoff (seção 8), com `escala:` trocado por `frequency:` (D7).
+terrain(width: 256, length: 256, height: 64);
+
+// geradores
+perlin montanhao(frequency: 0.5, octaves: 2, seed: 1);
+perlin cadeia(frequency: 4.0, octaves: 6, seed: 42);
+perlin planicie(frequency: 8.0, octaves: 3, seed: 7);
+
+// combinações
+noise anel  = cadeia - montanhao;            // clamp em 0: cordilheira sem o centro
+noise final = anel + 0.5 * planicie;         // soma com clamp em 1
+
+// saída
+display final#6B8E23 depth;
+export final as "terreno.png";
+export octaves montanhao to "camadas/";

@@ -31,14 +31,14 @@ perlin2D::NoiseConfig Evaluator::configFor(const ast::PrimitiveDecl& decl) const
     perlin2D::NoiseConfig c = prt::config(grid());
     // Omitidos usam os padrões de NoiseConfig (D7).
     for (const auto& p : decl.params) {
-        if (p.name == "frequencia") c.freq = static_cast<float>(p.value);
-        else if (p.name == "oitavas") c.octaves = static_cast<unsigned>(p.value);
-        else if (p.name == "semente") c.seed = static_cast<unsigned>(p.value);
-        else if (p.name == "persistencia") c.pers = static_cast<float>(p.value);
-        else if (p.name == "lacunaridade") c.lac = static_cast<float>(p.value);
+        if (p.name == "frequency") c.freq = static_cast<float>(p.value);
+        else if (p.name == "octaves") c.octaves = static_cast<unsigned>(p.value);
+        else if (p.name == "seed") c.seed = static_cast<unsigned>(p.value);
+        else if (p.name == "persistence") c.pers = static_cast<float>(p.value);
+        else if (p.name == "lacunarity") c.lac = static_cast<float>(p.value);
         else if (p.name == "amplitude") c.amp = static_cast<float>(p.value);
-        else if (p.name == "expoente") c.exp = static_cast<float>(p.value);
-        else if (p.name == "onda") c.wave = static_cast<int>(p.value);
+        else if (p.name == "exponent") c.exp = static_cast<float>(p.value);
+        else if (p.name == "wave") c.wave = static_cast<int>(p.value);
     }
     return c;
 }
@@ -96,13 +96,13 @@ Field Evaluator::evaluate(const ast::Expr& e) {
             const std::string& fn = e.name;
             if (fn == "max") return zip(a, b, prt::max);
             if (fn == "min") return zip(a, b, prt::min);
-            if (fn == "acima") return zip(a, b, prt::acima);
-            if (fn == "abaixo") return zip(a, b, prt::abaixo);
-            if (fn == "media") return zip(a, b, prt::media);
-            if (fn == "mistura") {
+            if (fn == "above") return zip(a, b, prt::above);
+            if (fn == "below") return zip(a, b, prt::below);
+            if (fn == "avg") return zip(a, b, prt::avg);
+            if (fn == "mix") {
                 const float na = static_cast<float>(e.children[2]->number);
                 const float nb = static_cast<float>(e.children[3]->number);
-                return zip(a, b, [=](float x, float y) { return prt::mistura(x, y, na, nb); });
+                return zip(a, b, [=](float x, float y) { return prt::mix(x, y, na, nb); });
             }
             throw std::logic_error("função sem avaliação: " + fn);
         }

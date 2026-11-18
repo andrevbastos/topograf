@@ -1,0 +1,11 @@
+terrain(width: 256, length: 256, height: 256);
+
+perlin A(frequency: 1, octaves: 6, seed: 28082004);
+perlin B(frequency: 2, octaves: 5, seed: 28082004, exponent: 2);
+
+noise grama = A * 0.7;
+noise montanhas = above(B, 0.35) * 0.8;
+
+display grama#green, montanhas#white, (0.35)#cyan depth;
+export montanhas as "resultados/montanhas.png";
+export octaves B to "resultados/camadas/";

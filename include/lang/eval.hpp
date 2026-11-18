@@ -52,7 +52,7 @@ private:
     std::size_t size() const { return static_cast<std::size_t>(width_) * static_cast<std::size_t>(length_); }
 };
 
-// Executa todos os `exportar` na ordem do programa (D10).
+// Executa todos os `export` na ordem do programa (D10).
 // Retorna as mensagens de erro de execução (vazio se tudo deu certo).
 std::vector<std::string> runExports(const ast::Program& program, Evaluator& ev);
 

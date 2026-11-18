@@ -1,4 +1,0 @@
-// espera: linha 4, coluna 10: erro léxico: cor inválida '#roxo'
-terreno(width: 8, length: 8, height: 4);
-ruido A(semente: 1);
-display A#roxo;

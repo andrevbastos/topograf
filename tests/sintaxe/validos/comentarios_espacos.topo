@@ -1,0 +1,11 @@
+// espera: terrain(width: 16, length: 16)
+// espera: perlin A(octaves: 1)  @10
+// espera: export A as "a.png"  @11
+// comentário no início
+
+terrain (  width : 16 ,
+           length: 16 )  ;   // cabeçalho em duas linhas
+
+	// tab antes do comentário
+perlin A(octaves: 1);
+export A as "a.png";

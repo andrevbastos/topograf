@@ -1,3 +1,0 @@
-// espera: linha 3, coluna 9: erro semântico: 'width' deve ser > 0 (recebeu 0)
-// espera: 1 erro(s) semântico(s)
-terreno(width: 0, length: 256);

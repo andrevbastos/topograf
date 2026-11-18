@@ -1,0 +1,5 @@
+terrain(width: 16, length: 8);
+perlin A(frequency: 2, octaves: 2, seed: 3, persistence: 0.7);
+noise C = A + A;
+noise D = max(C, A) - 0.1 * A;
+perlin P(lacunarity: 3, amplitude: 1.5, exponent: 2, wave: 100, seed: 5);

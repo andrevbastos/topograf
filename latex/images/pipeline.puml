@@ -1,7 +1,7 @@
 @startuml
 skinparam dpi 300
 start
-:Programa <arquivo>.terreno;
+:Programa <arquivo>.topo;
 :Flex;
 :Bison 
 (AST);

@@ -86,8 +86,8 @@
 %% Listagens da linguagem Topograf
 %% ---------------------------------------------------------------------
 \lstdefinelanguage{Topograf}{
-  morekeywords={terreno,ruido,display,exportar,como,em,oitavas,profundidade},
-  morekeywords=[2]{max,min,acima,abaixo,media,mistura},
+  morekeywords={terrain,perlin,noise,display,export,as,to,octaves,depth},
+  morekeywords=[2]{max,min,above,below,avg,mix},
   sensitive=true,
   morecomment=[l]{//},
   morestring=[b]",
@@ -288,12 +288,12 @@ e o ruído resultante é a soma das oitavas:
 em que $P$ é o ruído Perlin de uma camada.
 
 O gerador da Topograf acrescenta alguns passos a essa soma. As
-coordenadas da grade são divididas pelo parâmetro \texttt{onda} antes da
+coordenadas da grade são divididas pelo parâmetro \texttt{wave} antes da
 amostragem, e cada oitava recebe um deslocamento sorteado a partir da
 semente. A soma é dividida por $\sqrt{\sum a_i^2}$, o que mantém sua
 dispersão próxima à de uma única oitava, e multiplicada pelo parâmetro
 \texttt{amplitude}. O valor é então limitado a $[-1,1]$, levado a $[0,1]$
-e elevado ao parâmetro \texttt{expoente}: acima de 1, achata as regiões
+e elevado ao parâmetro \texttt{exponent}: acima de 1, achata as regiões
 baixas e realça os picos. O resultado é a altura normalizada de cada
 ponto da grade, o valor que os ruídos primitivos da linguagem assumem.
 
@@ -364,17 +364,17 @@ ponto e vírgula, em três grupos: o cabeçalho, as declarações de ruído e
 os comandos de saída. A Listagem~\ref{lst:exemplo} mostra um programa
 completo.
 
-O cabeçalho \texttt{terreno} (linha 1) é obrigatório, aparece uma única
+O cabeçalho \texttt{terrain} (linha 1) é obrigatório, aparece uma única
 vez e vem antes de qualquer outro comando. Ele define a grade comum a
 todos os ruídos do programa, com \texttt{width} $\times$ \texttt{length}
 pontos, e a altura máxima \texttt{height}, em \textit{voxels}, usada
 apenas na visualização 3D. Como todos os ruídos compartilham a mesma
 grade, operações entre ruídos nunca envolvem dimensões diferentes.
 
-As linhas 3 e 4 declaram ruídos primitivos, cada um um gerador Perlin
+As linhas 3 e 4 declaram, com \texttt{perlin}, ruídos primitivos, cada um um gerador Perlin
 configurado por parâmetros nomeados, que correspondem aos da
 Seção~\ref{sec:perlin}; os omitidos assumem valores padrão. As linhas 6
-e 7 declaram ruídos compostos, definidos por expressões sobre ruídos já
+e 7 declaram, com \texttt{noise}, ruídos compostos, definidos por expressões sobre ruídos já
 declarados: \texttt{grama} é \texttt{A} com a altura reduzida a 70\%, e
 \texttt{montanhas} mantém apenas os pontos de \texttt{B} acima de
 $0{,}35$, escalados por $0{,}8$.
@@ -382,31 +382,31 @@ $0{,}35$, escalados por $0{,}8$.
 As linhas 9 a 11 são comandos de saída. O \texttt{display} abre uma
 janela 3D com uma camada por expressão, cada uma com sua cor; a
 expressão \texttt{(0.35)} é um campo constante e, em ciano, funciona
-como um plano de água. A palavra \texttt{profundidade} escurece as
-partes baixas de cada camada. Os comandos \texttt{exportar} gravam um
-ruído como imagem PNG em tons de cinza ou, com \texttt{oitavas}, uma
+como um plano de água. A palavra \texttt{depth} escurece as
+partes baixas de cada camada. Os comandos \texttt{export} gravam um
+ruído como imagem PNG em tons de cinza ou, com \texttt{octaves}, uma
 imagem por oitava de um ruído primitivo.
 
 \begin{lstlisting}[caption={Exemplo de uso da Topograf.}, label={lst:exemplo}, float=t]
-terreno(width: 256, length: 256, height: 256);
+terrain(width: 256, length: 256, height: 256);
 
-ruido A(frequencia: 1, oitavas: 6, semente: 28082004);
-ruido B(frequencia: 2, oitavas: 5, semente: 28082004, expoente: 2);
+perlin A(frequency: 1, octaves: 6, seed: 28082004);
+perlin B(frequency: 2, octaves: 5, seed: 28082004, exponent: 2);
 
-ruido grama = A * 0.7;
-ruido montanhas = acima(B, 0.35) * 0.8;
+noise grama = A * 0.7;
+noise montanhas = above(B, 0.35) * 0.8;
 
-display grama#green, montanhas#white, (0.35)#cyan profundidade;
-exportar montanhas como "resultados/montanhas.png";
-exportar oitavas B em "resultados/camadas/";
+display grama#green, montanhas#white, (0.35)#cyan depth;
+export montanhas as "resultados/montanhas.png";
+export octaves B to "resultados/camadas/";
 \end{lstlisting}
 
 \subsection{Sintaxe}\label{sec:sintaxe}
 A Listagem~\ref{lst:gramatica} resume a gramática na notação do Bison.
 Um programa é o cabeçalho seguido de zero ou mais comandos, e a
-gramática impõe que \texttt{terreno} venha primeiro e apareça uma única
-vez. As funções embutidas (\texttt{max}, \texttt{acima},
-\texttt{mistura} etc.) não têm produções próprias: todas são reconhecidas
+gramática impõe que \texttt{terrain} venha primeiro e apareça uma única
+vez. As funções embutidas (\texttt{max}, \texttt{above},
+\texttt{mix} etc.) não têm produções próprias: todas são reconhecidas
 pela regra geral \texttt{IDENT '(' args ')'}, e a análise semântica
 confere o nome e a aridade. Assim, acrescentar uma função não altera a
 gramática.
@@ -426,8 +426,8 @@ Duas decisões ficam no léxico. A primeira é a cor de uma camada do
 as expressões regulares do Flex não enxergam o que veio antes do
 \textit{token}, o analisador léxico guarda se o último trecho consumido
 foi espaço ou comentário e, nesse caso, rejeita a cor com um erro
-específico. A segunda é \texttt{oitavas}, que é palavra-chave no
-comando \texttt{exportar oitavas} e também nome de parâmetro dos
+específico. A segunda é \texttt{octaves}, que é palavra-chave no
+comando \texttt{export octaves} e também nome de parâmetro dos
 ruídos primitivos; a regra \texttt{nome\_param} aceita tanto um
 identificador quanto essa palavra-chave.
 
@@ -437,14 +437,14 @@ encontrado e os esperados.
 
 \begin{lstlisting}[language={}, caption={Gramática da Topograf (notação Bison, simplificada).}, label={lst:gramatica}, float=t, numbers=none]
 programa : cabecalho comandos ;
-cabecalho: TERRENO '(' params ')' ';' ;
-comando  : RUIDO IDENT '(' params ')' ';'
-         | RUIDO IDENT '=' expr ';'
+cabecalho: TERRAIN '(' params ')' ';' ;
+comando  : PERLIN IDENT '(' params ')' ';'
+         | NOISE IDENT '=' expr ';'
          | DISPLAY camadas opt_prof ';'
-         | EXPORTAR IDENT COMO STRING ';'
-         | EXPORTAR OITAVAS IDENT EM STRING ';' ;
+         | EXPORT IDENT AS STRING ';'
+         | EXPORT OCTAVES IDENT TO STRING ';' ;
 param    : nome_param ':' NUMERO ;
-nome_param: IDENT | OITAVAS ;
+nome_param: IDENT | OCTAVES ;
 expr     : expr '+' expr | expr '-' expr
          | expr '*' expr | expr '/' expr
          | '(' expr ')' | NUMERO | IDENT
@@ -454,11 +454,12 @@ camada   : expr opt_cor ;
 
 \subsection{Tipos e semântica}\label{sec:semantica}
 A Topograf distingue três tipos de valor. Um ruído primitivo é um
-gerador Perlin declarado com parâmetros; um ruído composto é definido
-por uma expressão; um número é um literal. Primitivos e compostos são
-campos, que atribuem um valor em $[0,1]$ a cada ponto da grade. A
-distinção entre eles só importa em \texttt{exportar oitavas}, que exige
-um primitivo, pois só ele tem oitavas.
+gerador Perlin declarado com \texttt{perlin} e parâmetros; um ruído
+composto é definido com \texttt{noise} e uma expressão; um número é um
+literal. Primitivos e compostos são campos, que atribuem um valor em
+$[0,1]$ a cada ponto da grade. A distinção entre eles é feita já pela
+sintaxe e só importa em \texttt{export octaves}, que exige um
+primitivo, pois só ele tem oitavas.
 
 Todas as operações são ponto a ponto: o valor em $(i,j)$ depende apenas
 dos valores dos operandos em $(i,j)$. A Tabela~\ref{tab:operadores}
@@ -466,7 +467,7 @@ lista os operadores. Todo resultado é limitado a $[0,1]$, de modo que os
 campos são fechados sob todas as operações: qualquer expressão aceita
 pela análise semântica produz um mapa de altura válido. Um número em
 posição de ruído é promovido a campo constante, também limitado a
-$[0,1]$, o que permite escrever limiares como \texttt{acima(B, 0.35)} ou
+$[0,1]$, o que permite escrever limiares como \texttt{above(B, 0.35)} ou
 deslocamentos como \texttt{A + 0.2}. A exceção é o produto, em que o
 literal atua como fator de escala e pode ser maior que 1, como em
 \texttt{2 * A}.
@@ -477,14 +478,14 @@ as seguintes regras:
 \begin{itemize}
   \item todo nome é declarado antes do uso, uma única vez, e não
         coincide com o de uma função embutida;
-  \item os parâmetros de \texttt{terreno} e dos primitivos existem, não
-        se repetem e respeitam seus domínios, como \texttt{oitavas}
+  \item os parâmetros de \texttt{terrain} e dos primitivos existem, não
+        se repetem e respeitam seus domínios, como \texttt{octaves}
         inteiro e maior ou igual a 1;
   \item no produto, ao menos um lado é um literal numérico, o que
         exclui ruído $\times$ ruído, e a divisão é sempre rejeitada;
   \item cada função recebe o número correto de argumentos e, em
-        \texttt{mistura}, os pesos são literais e não ambos nulos;
-  \item \texttt{exportar oitavas} recebe um primitivo, e
+        \texttt{mix}, os pesos são literais e não ambos nulos;
+  \item \texttt{export octaves} recebe um primitivo, e
         \texttt{display} exige \texttt{height} no cabeçalho.
 \end{itemize}
 Um literal é um nó numérico da AST. Como parênteses não criam nós,
@@ -509,20 +510,20 @@ houver algum.
     \texttt{k * A}              & $\operatorname{clamp}_{[0,1]}(k\,A)$ \\
     \texttt{max(A, B)}          & $\max(A, B)$ \\
     \texttt{min(A, B)}          & $\min(A, B)$ \\
-    \texttt{acima(A, B)}        & $A$ se $A > B$, senão $0$ \\
-    \texttt{abaixo(A, B)}       & $A$ se $A < B$, senão $0$ \\
-    \texttt{media(A, B)}        & $(A + B)/2$ \\
-    \texttt{mistura(A,B,nA,nB)} & $(A\,n_A + B\,n_B)/(n_A + n_B)$ \\
+    \texttt{above(A, B)}        & $A$ se $A > B$, senão $0$ \\
+    \texttt{below(A, B)}        & $A$ se $A < B$, senão $0$ \\
+    \texttt{avg(A, B)}          & $(A + B)/2$ \\
+    \texttt{mix(A,B,nA,nB)}     & $(A\,n_A + B\,n_B)/(n_A + n_B)$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \subsection{Saídas}\label{sec:saidas}
-O comando \texttt{exportar X como "terreno-final.png"} grava o ruído \texttt{X},
+O comando \texttt{export X as "terreno-final.png"} grava o ruído \texttt{X},
 primitivo ou composto, como uma imagem em tons de cinza com
 \texttt{width} $\times$ \texttt{length} \textit{pixels}, em que o valor
 de cada ponto em $[0,1]$ é levado à faixa de 0 a 255. O comando
-\texttt{exportar oitavas X em "camadas/"} aceita apenas primitivos e grava
+\texttt{export octaves X to "camadas/"} aceita apenas primitivos e grava
 uma imagem por oitava, sem o peso da persistência, o que permite
 inspecionar a contribuição de cada escala separadamente. Em ambos os
 casos, os diretórios que faltam são criados.
@@ -532,7 +533,7 @@ expressão da lista é uma camada, convertida em malha como na
 Seção~\ref{sec:mc} e desenhada com a cor indicada após \texttt{\#}, por
 código hexadecimal ou por uma de dez cores nomeadas; sem cor, a camada
 é cinza. As camadas são sobrepostas na mesma cena e, onde coincidem, a
-posterior fica por cima. A opção \texttt{profundidade} escurece as
+posterior fica por cima. A opção \texttt{depth} escurece as
 partes baixas de cada camada, o que realça o relevo. Cada
 \texttt{display} abre a sua própria janela, e todas ficam abertas ao
 mesmo tempo.
@@ -586,7 +587,7 @@ expressão inteira embutida, sem campos intermediários. Para
 \texttt{montanhas}, na Listagem~\ref{lst:exemplo}, o corpo do laço é
 \begin{center}
 \scriptsize
-\texttt{v\_montanhas[i] = prt::scale(0.8f, prt::acima(v\_B[i], prt::c01(0.35f)));}
+\texttt{v\_montanhas[i] = prt::scale(0.8f, prt::above(v\_B[i], prt::c01(0.35f)));}
 \end{center}
 (com as conversões numéricas simplificadas). Os dois \textit{back-ends}
 chamam as mesmas funções do \textit{runtime} para cada operação, e o
@@ -603,7 +604,7 @@ valor do ruído e $H$ o \texttt{height}, de modo que toda coluna tem ao
 menos um \textit{voxel}. Cada camada do \texttt{display} gera uma malha
 própria pelo Marching Cubes da Seção~\ref{sec:mc}; vértices sobre a
 mesma aresta são compartilhados entre células vizinhas por meio de uma
-tabela \textit{hash}. Com \texttt{profundidade}, a cor de cada vértice é
+tabela \textit{hash}. Com \texttt{depth}, a cor de cada vértice é
 multiplicada por $0{,}35 + 0{,}65\,t$, em que $t$ é a altura do vértice
 normalizada entre a menor e a maior coluna da camada. Para evitar
 \textit{z-fighting}, a camada $i$ é deslocada $0{,}05\,i$ para cima, o
@@ -615,6 +616,15 @@ que admite uma
 única janela por processo e exige a \textit{thread} principal. Por isso,
 cada \texttt{display} roda em um processo filho criado com
 \texttt{fork}, e o processo pai espera todas as janelas serem fechadas.
+Antes de abrir a janela, cada filho gera as malhas em paralelo com o
+\textit{thread pool} do IFCG, implementado com \texttt{std::jthread} do
+C++20~\cite{williams2019}. O \textit{pool} é criado já no filho, pois o
+\texttt{fork} copia apenas a \textit{thread} que o chamou. A grade de
+cada camada é dividida em fatias ao longo de $z$, processadas como
+tarefas independentes, cada uma com sua própria tabela \textit{hash}; na
+junção, os vértices da fronteira entre fatias vizinhas são unificados na
+mesma ordem da versão sequencial, de modo que a malha resultante é
+idêntica.
 
 %% =====================================================================
 %% 5. RESULTADOS  (~0,9 pag.)
@@ -623,12 +633,12 @@ cada \texttt{display} roda em um processo filho criado com
 A Figura~\ref{fig:terreno} mostra as saídas do programa da
 Listagem~\ref{lst:exemplo}. Na visualização 3D, a camada verde é
 \texttt{grama}, o plano ciano é o campo constante $0{,}35$ e a camada
-branca é \texttt{montanhas}. Como \texttt{acima} zera os pontos de
+branca é \texttt{montanhas}. Como \texttt{above} zera os pontos de
 \texttt{B} abaixo do limiar, \texttt{montanhas} passa de 0 a mais de
 $0{,}28$ entre pontos vizinhos, e essa descontinuidade aparece como
 paredes verticais que sobem da base, em cinza escuro por causa da
-\texttt{profundidade}. A figura também mostra o mapa de altura de
-\texttt{B}, gravado por \texttt{exportar}, e suas cinco oitavas, em que
+\texttt{depth}. A figura também mostra o mapa de altura de
+\texttt{B}, gravado por \texttt{export}, e suas cinco oitavas, em que
 a frequência dobra a cada camada.
 
 \begin{figure}[htb]
@@ -639,11 +649,11 @@ a frequência dobra a cada camada.
     \small (a) & \small (b)
   \end{tabular}\\[1mm]
   \begin{tabular}{@{}c@{\hspace{1mm}}c@{\hspace{1mm}}c@{\hspace{1mm}}c@{\hspace{1mm}}c@{}}
-    \includegraphics[width=0.185\linewidth]{images/camadas/export_oitava_0.png} &
-    \includegraphics[width=0.185\linewidth]{images/camadas/export_oitava_1.png} &
-    \includegraphics[width=0.185\linewidth]{images/camadas/export_oitava_2.png} &
-    \includegraphics[width=0.185\linewidth]{images/camadas/export_oitava_3.png} &
-    \includegraphics[width=0.185\linewidth]{images/camadas/export_oitava_4.png} \\
+    \includegraphics[width=0.185\linewidth]{images/camadas/export_octave_0.png} &
+    \includegraphics[width=0.185\linewidth]{images/camadas/export_octave_1.png} &
+    \includegraphics[width=0.185\linewidth]{images/camadas/export_octave_2.png} &
+    \includegraphics[width=0.185\linewidth]{images/camadas/export_octave_3.png} &
+    \includegraphics[width=0.185\linewidth]{images/camadas/export_octave_4.png} \\
     \multicolumn{5}{c}{\small (c)}
   \end{tabular}
   \caption{Saídas do programa da Listagem~\ref{lst:exemplo}: (a) janela do
@@ -675,10 +685,10 @@ arquivos idênticos byte a byte, o que confirma que os dois
     \toprule
     \textbf{Expressão} & \textbf{Valor} & \textbf{Expressão} & \textbf{Valor} \\
     \midrule
-    \texttt{A + B}       & $[0{,}7;\ 1{,}0]$ & \texttt{acima(A, B)}  & $[0{,}0;\ 0{,}8]$ \\
-    \texttt{A - B}       & $[0{,}0;\ 0{,}3]$ & \texttt{abaixo(A, B)} & $[0{,}2;\ 0{,}0]$ \\
-    \texttt{max(A, B)}   & $[0{,}5;\ 0{,}8]$ & \texttt{media(A, B)}  & $[0{,}35;\ 0{,}65]$ \\
-    \texttt{min(A, B)}   & $[0{,}2;\ 0{,}5]$ & \texttt{mistura(A, B, 30, 70)} & $[0{,}41;\ 0{,}59]$ \\
+    \texttt{A + B}       & $[0{,}7;\ 1{,}0]$ & \texttt{above(A, B)}  & $[0{,}0;\ 0{,}8]$ \\
+    \texttt{A - B}       & $[0{,}0;\ 0{,}3]$ & \texttt{below(A, B)}  & $[0{,}2;\ 0{,}0]$ \\
+    \texttt{max(A, B)}   & $[0{,}5;\ 0{,}8]$ & \texttt{avg(A, B)}    & $[0{,}35;\ 0{,}65]$ \\
+    \texttt{min(A, B)}   & $[0{,}2;\ 0{,}5]$ & \texttt{mix(A, B, 30, 70)} & $[0{,}41;\ 0{,}59]$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -697,7 +707,7 @@ fora do escopo, de modo que não é possível, por exemplo, usar um ruído
 como máscara multiplicativa de outro.
 
 Os resultados também mostram efeitos que o usuário precisa conhecer.
-Os operadores de limiar, como \texttt{acima}, criam descontinuidades que
+Os operadores de limiar, como \texttt{above}, criam descontinuidades que
 a visualização exibe como paredes verticais
 (Figura~\ref{fig:terreno}a). Além disso, o ruído Perlin não ocupa todo
 o intervalo: com uma oitava e amplitude e expoente iguais a 1, como

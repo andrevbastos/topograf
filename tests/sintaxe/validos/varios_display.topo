@@ -1,0 +1,6 @@
+// espera: display A  @5
+// espera: display A depth  @6
+terrain(width: 8, length: 8, height: 4);
+perlin A(seed: 1);
+display A;
+display A depth;

@@ -1,0 +1,2 @@
+// espera: linha 2, coluna 1: erro sintático: encontrado perlin inesperado, esperado terrain
+perlin A(seed: 1);

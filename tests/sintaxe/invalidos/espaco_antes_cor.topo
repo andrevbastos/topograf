@@ -1,0 +1,4 @@
+// espera: linha 4, coluna 11: erro léxico: espaço antes da cor
+terrain(width: 8, length: 8, height: 4);
+perlin A(seed: 1);
+display A #red;

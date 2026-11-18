@@ -41,7 +41,7 @@ static bool load(Loaded& l, const std::string& path) {
 
 static void tabela(const std::string& dir) {
     Loaded l;
-    if (!load(l, dir + "/tabela.terreno")) return;
+    if (!load(l, dir + "/tabela.topo")) return;
     rt::Evaluator ev(l.driver.program, l.sem);
     ev.preload("A", {0.2f, 0.8f});
     ev.preload("B", {0.5f, 0.5f});
@@ -78,7 +78,7 @@ static void tabela(const std::string& dir) {
 
 static void cache(const std::string& dir) {
     Loaded l;
-    if (!load(l, dir + "/cache.terreno")) return;
+    if (!load(l, dir + "/cache.topo")) return;
     rt::Evaluator ev(l.driver.program, l.sem);
 
     const auto& d = ev.field("D");
@@ -88,15 +88,15 @@ static void cache(const std::string& dir) {
     // Parâmetros chegam ao gerador como em D7.
     perlin2D::NoiseConfig c {};
     c.width = 16; c.height = 8; c.freq = 2.0f; c.octaves = 2; c.seed = 3; c.pers = 0.7f;
-    check(ev.field("A") == perlin2D::generateNoiseMap(c), "cache: A = generateNoiseMap(freq 2, oitavas 2, semente 3, pers 0.7)");
+    check(ev.field("A") == perlin2D::generateNoiseMap(c), "cache: A = generateNoiseMap(frequency 2, octaves 2, seed 3, persistence 0.7)");
 
     perlin2D::NoiseConfig cp {};
     cp.width = 16; cp.height = 8; cp.lac = 3.0f; cp.amp = 1.5f; cp.exp = 2.0f; cp.wave = 100; cp.seed = 5;
-    check(ev.field("P") == perlin2D::generateNoiseMap(cp), "cache: P = generateNoiseMap(lac 3, amp 1.5, exp 2, wave 100, semente 5)");
+    check(ev.field("P") == perlin2D::generateNoiseMap(cp), "cache: P = generateNoiseMap(lac 3, amp 1.5, exp 2, wave 100, seed 5)");
 
     perlin2D::NoiseConfig padrao {};
     padrao.width = 16; padrao.height = 8; padrao.seed = 5;
-    check(ev.field("P") != perlin2D::generateNoiseMap(padrao), "cache: lacunaridade/amplitude/expoente/onda alteram o campo");
+    check(ev.field("P") != perlin2D::generateNoiseMap(padrao), "cache: lacunarity/amplitude/exponent/wave alteram o campo");
 
     bool inRange = true;
     for (float v : d) inRange = inRange && v >= 0.0f && v <= 1.0f;
@@ -115,7 +115,7 @@ static bool pngEquals(const std::string& path, const rt::Field& f, int w, int h)
 
 static void png(const std::string& dir, const std::string& tmp) {
     Loaded l;
-    if (!load(l, fs::absolute(dir + "/png.terreno").string())) return;
+    if (!load(l, fs::absolute(dir + "/png.topo").string())) return;
     rt::Evaluator ev(l.driver.program, l.sem);
 
     fs::remove_all(tmp);

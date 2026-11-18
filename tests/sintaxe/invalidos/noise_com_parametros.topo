@@ -1,0 +1,4 @@
+// noise declara só compostos: parâmetros de gerador com noise é erro sintático.
+// espera: linha 4, coluna 8: erro sintático: encontrado ( inesperado, esperado =
+terrain(width: 8, length: 8);
+noise A(seed: 1);

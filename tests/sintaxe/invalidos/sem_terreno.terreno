@@ -1,2 +1,0 @@
-// espera: linha 2, coluna 1: erro sintático: encontrado ruido inesperado, esperado terreno
-ruido A(semente: 1);

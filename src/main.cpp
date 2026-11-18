@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	// Interpretador. D10: todos os exportar primeiro, display por último.
+	// Interpretador. D10: todos os export primeiro, display por último.
 	rt::Evaluator ev(driver.program, sem);
 	const auto runtimeErrors = rt::runExports(driver.program, ev);
 	for (const auto& e : runtimeErrors) std::cerr << path << ": " << e << "\n";

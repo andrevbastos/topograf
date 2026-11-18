@@ -33,14 +33,15 @@ ID       [A-Za-z_][A-Za-z0-9_]*
 \n+                 { loc.lines(yyleng); loc.step(); afterSpace = true; }
 "//"[^\n]*          { loc.step(); afterSpace = true; }
 
-"terreno"           { afterSpace = false; return yy::parser::make_TERRENO(loc); }
-"ruido"             { afterSpace = false; return yy::parser::make_RUIDO(loc); }
+"terrain"           { afterSpace = false; return yy::parser::make_TERRAIN(loc); }
+"perlin"            { afterSpace = false; return yy::parser::make_PERLIN(loc); }
+"noise"             { afterSpace = false; return yy::parser::make_NOISE(loc); }
 "display"           { afterSpace = false; return yy::parser::make_DISPLAY(loc); }
-"exportar"          { afterSpace = false; return yy::parser::make_EXPORTAR(loc); }
-"como"              { afterSpace = false; return yy::parser::make_COMO(loc); }
-"em"                { afterSpace = false; return yy::parser::make_EM(loc); }
-"oitavas"           { afterSpace = false; return yy::parser::make_OITAVAS(loc); }
-"profundidade"      { afterSpace = false; return yy::parser::make_PROFUNDIDADE(loc); }
+"export"            { afterSpace = false; return yy::parser::make_EXPORT(loc); }
+"as"                { afterSpace = false; return yy::parser::make_AS(loc); }
+"to"                { afterSpace = false; return yy::parser::make_TO(loc); }
+"octaves"           { afterSpace = false; return yy::parser::make_OCTAVES(loc); }
+"depth"             { afterSpace = false; return yy::parser::make_DEPTH(loc); }
 
 "+"                 { afterSpace = false; return yy::parser::make_PLUS(loc); }
 "-"                 { afterSpace = false; return yy::parser::make_MINUS(loc); }

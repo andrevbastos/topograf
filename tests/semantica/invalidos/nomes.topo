@@ -1,0 +1,14 @@
+// espera: linha 9, coluna 15: erro semântico: 'B' usado antes de ser declarado (declarado na linha 10)
+// espera: linha 11, coluna 1: erro semântico: 'A' já declarado na linha 8
+// espera: linha 12, coluna 1: erro semântico: 'max' é nome de função embutida
+// espera: linha 13, coluna 11: erro semântico: 'Z' não declarado
+// espera: linha 14, coluna 11: erro semântico: 'D' usado antes de ser declarado (declarado na linha 14)
+// espera: 5 erro(s) semântico(s)
+terrain(width: 8, length: 8);
+perlin A(seed: 1);
+noise C = A + B;
+perlin B(seed: 2);
+perlin A(seed: 3);
+perlin max(seed: 4);
+noise E = Z;
+noise D = D + A;

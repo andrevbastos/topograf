@@ -1,4 +1,0 @@
-// espera: linha 4, coluna 1: erro sintático: encontrado exportar inesperado
-terreno(width: 8, length: 8);
-ruido A(semente: 1)
-exportar A como "a.png";

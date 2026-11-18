@@ -1,0 +1,28 @@
+// Tabela de 2 pontos (handoff, seção 8). A e B são substituídos no teste por
+// A = [0.2, 0.8] e B = [0.5, 0.5]; os demais são avaliados a partir deles.
+terrain(width: 2, length: 1);
+perlin A(seed: 1);
+perlin B(seed: 2);
+
+// handoff, seção 8
+noise soma   = A + B;
+noise sub    = A - B;
+noise maior  = max(A, B);
+noise menor  = min(A, B);
+noise sobre  = above(A, B);
+noise sob    = below(A, B);
+noise med    = avg(A, B);
+noise mis    = mix(A, B, 30, 70);
+
+// complementares
+noise mis2   = mix(A, B, 3, 7);     // = mix(A, B, 30, 70)
+noise mis11  = mix(A, B, 1, 1);     // = avg(A, B)
+noise sobB   = above(B, A);             // ordem importa
+noise esc    = 2 * A;                   // clamp em 1
+noise esc2   = A * 0.5;
+noise limiar = above(A, 0.3);           // número promovido (D9)
+noise mais   = A + 0.5;
+noise menos  = 0.3 - A;
+noise aninh  = avg(A, B) - 0.3 * B;   // usa composto e escalar
+noise usa    = soma - sub;              // composto de compostos
+noise const  = 2;                       // campo constante com clamp

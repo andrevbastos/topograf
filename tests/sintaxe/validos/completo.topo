@@ -1,0 +1,13 @@
+// espera: terrain(width: 256, length: 256, height: 64)
+// espera: perlin A(frequency: 4, octaves: 3, seed: 42, persistence: 0.5)  @8
+// espera: noise C = (+ (* (max A B) 0.5) (above A 0.3))  @10
+// espera: display A#00ff00, C#8b4513 depth  @11
+// espera: export C as "c.png"  @12
+// espera: export octaves A to "out/"  @13
+terrain(width: 256, length: 256, height: 64);
+perlin A(frequency: 4, octaves: 3, seed: 42, persistence: 0.5);
+perlin B(frequency: 8);
+noise C = max(A, B) * 0.5 + above(A, 0.3);
+display A#green, C#brown depth;
+export C as "c.png";
+export octaves A to "out/";

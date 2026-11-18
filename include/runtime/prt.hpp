@@ -1,7 +1,7 @@
 #pragma once
 
 // Runtime do topograf: usado pelo interpretador e pelos executáveis gerados pelo
-// compilador (`topograf prog.terreno -o prog`). Não inclui o ifcg; o display fica
+// compilador (`topograf prog.topo -o prog`). Não inclui o ifcg; o display fica
 // em topograf_display.
 
 #include <algorithm>
@@ -36,10 +36,10 @@ inline float sub(float a, float b) { return c01(a - b); }
 inline float scale(float k, float a) { return c01(k * a); }
 inline float max(float a, float b) { return c01(std::max(a, b)); }
 inline float min(float a, float b) { return c01(std::min(a, b)); }
-inline float acima(float a, float b) { return c01(a > b ? a : 0.0f); }
-inline float abaixo(float a, float b) { return c01(a < b ? a : 0.0f); }
-inline float media(float a, float b) { return c01((a + b) / 2.0f); }
-inline float mistura(float a, float b, float na, float nb) { return c01((a * na + b * nb) / (na + nb)); }
+inline float above(float a, float b) { return c01(a > b ? a : 0.0f); }
+inline float below(float a, float b) { return c01(a < b ? a : 0.0f); }
+inline float avg(float a, float b) { return c01((a + b) / 2.0f); }
+inline float mix(float a, float b, float na, float nb) { return c01((a * na + b * nb) / (na + nb)); }
 
 // ---------- primitivos ----------
 
@@ -51,7 +51,7 @@ inline perlin2D::NoiseConfig config(const Grid& g) {
     return c;
 }
 
-// ---------- exportar ----------
+// ---------- export ----------
 
 // Mensagens de erro já começam com "linha N: erro de execução: ...".
 std::optional<std::string> exportPNG(const Grid& g, const Field& f, const std::string& path, int line);

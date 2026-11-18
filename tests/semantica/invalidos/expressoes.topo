@@ -1,0 +1,21 @@
+// espera: linha 13, coluna 13: erro semântico: '*' exige que ao menos um lado seja número literal
+// espera: linha 14, coluna 13: erro semântico: divisão não suportada
+// espera: linha 15, coluna 19: erro semântico: '*' exige que ao menos um lado seja número literal
+// espera: linha 16, coluna 11: erro semântico: 'max' espera 2 argumentos, recebeu 3
+// espera: linha 17, coluna 11: erro semântico: função desconhecida 'soma'
+// espera: linha 18, coluna 11: erro semântico: 'A' é um ruído, não uma função
+// espera: linha 19, coluna 11: erro semântico: 'max' é função embutida e precisa de argumentos
+// espera: linha 20, coluna 23: erro semântico: argumento 3 de 'mix' deve ser número literal
+// espera: linha 21, coluna 11: erro semântico: 'mix' com pesos 0 e 0
+// espera: 9 erro(s) semântico(s)
+terrain(width: 8, length: 8);
+perlin A(seed: 1); perlin B(seed: 2);
+noise C = A * B;
+noise D = A / 2;
+noise E = (A + 1) * (2 + 3);
+noise F = max(A, B, A);
+noise G = soma(A, B);
+noise H = A(B);
+noise I = max + A;
+noise J = mix(A, B, 2 * 1, 3);
+noise K = mix(A, B, 0, 0.0);

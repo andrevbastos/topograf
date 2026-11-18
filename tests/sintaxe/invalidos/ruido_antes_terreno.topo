@@ -1,0 +1,4 @@
+// Handoff, seção 8: terrain precisa vir antes de qualquer ruído.
+// espera: linha 3, coluna 1: erro sintático: encontrado noise inesperado, esperado terrain
+noise w = montanhao;
+terrain(width: 256, length: 256);

@@ -1,5 +1,0 @@
-terreno(width: 16, length: 8);
-ruido A(frequencia: 2, oitavas: 2, semente: 3, persistencia: 0.7);
-ruido C = A + A;
-ruido D = max(C, A) - 0.1 * A;
-ruido P(lacunaridade: 3, amplitude: 1.5, expoente: 2, onda: 100, semente: 5);

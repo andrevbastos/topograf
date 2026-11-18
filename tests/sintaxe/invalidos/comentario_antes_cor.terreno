@@ -1,5 +1,0 @@
-// espera: linha 5, coluna 1: erro léxico: espaço antes da cor
-terreno(width: 8, length: 8, height: 4);
-ruido A(semente: 1);
-display A// comentário
-#red;

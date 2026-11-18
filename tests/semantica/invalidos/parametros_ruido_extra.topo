@@ -1,0 +1,9 @@
+// espera: linha 8, coluna 10: erro semântico: 'lacunarity' deve ser > 0 (recebeu 0)
+// espera: linha 8, coluna 25: erro semântico: 'amplitude' deve ser > 0 (recebeu 0)
+// espera: linha 8, coluna 39: erro semântico: 'exponent' deve ser > 0 (recebeu 0)
+// espera: linha 8, coluna 52: erro semântico: 'wave' deve ser inteiro (recebeu 2.5)
+// espera: linha 9, coluna 10: erro semântico: 'wave' deve ser > 0 (recebeu 0)
+// espera: 5 erro(s) semântico(s)
+terrain(width: 8, length: 8);
+perlin A(lacunarity: 0, amplitude: 0, exponent: 0, wave: 2.5);
+perlin B(wave: 0);

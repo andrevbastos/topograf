@@ -1,0 +1,11 @@
+// espera: linha 8, coluna 1: erro semântico: display exige 'height' em terrain
+// espera: linha 9, coluna 1: erro semântico: 'export octaves' exige um ruído primitivo (perlin); 'C' é composto (noise)
+// espera: linha 10, coluna 1: erro semântico: 'X' não declarado
+// espera: linha 11, coluna 1: erro semântico: 'Y' não declarado
+// espera: 4 erro(s) semântico(s)
+terrain(width: 8, length: 8);
+perlin A(seed: 1); noise C = A + 0.1;
+display A, C#red;
+export octaves C to "out/";
+export X as "x.png";
+export octaves Y to "y/";

@@ -1,0 +1,4 @@
+// espera: linha 4, coluna 11: erro sintático: encontrado - inesperado
+terrain(width: 8, length: 8);
+perlin A(seed: 1);
+noise B = -A;

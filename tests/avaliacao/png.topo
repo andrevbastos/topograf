@@ -1,0 +1,6 @@
+terrain(width: 4, length: 3);
+noise M = 0.5;
+perlin A(seed: 1);
+export M as "m.png";
+export A as "sub/dir/a.png";
+export octaves A to "oit";

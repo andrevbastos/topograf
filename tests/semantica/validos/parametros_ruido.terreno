@@ -1,5 +1,0 @@
-// espera: A primitivo linha 4 (frequencia: 2, oitavas: 5, semente: 9, persistencia: 0.4, lacunaridade: 2.5, amplitude: 1.2, expoente: 1.5, onda: 120)
-// espera: B primitivo linha 5 (onda: 1)
-terreno(width: 8, length: 8);
-ruido A(frequencia: 2, oitavas: 5, semente: 9, persistencia: 0.4, lacunaridade: 2.5, amplitude: 1.2, expoente: 1.5, onda: 120);
-ruido B(onda: 1);

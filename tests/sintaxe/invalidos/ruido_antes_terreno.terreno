@@ -1,4 +1,0 @@
-// Handoff, seção 8: terreno precisa vir antes de qualquer ruído.
-// espera: linha 3, coluna 1: erro sintático: encontrado ruido inesperado, esperado terreno
-ruido w = montanhao;
-terreno(width: 256, length: 256);

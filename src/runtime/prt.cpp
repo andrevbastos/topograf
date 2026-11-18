@@ -19,7 +19,7 @@ std::optional<std::string> exportPNG(const Grid& g, const Field& f, const std::s
 }
 
 std::string octavePath(const std::string& dir, const std::string& name, int i) {
-    return (std::filesystem::path(dir) / std::format("{}_oitava_{}.png", name, i)).string();
+    return (std::filesystem::path(dir) / std::format("{}_octave_{}.png", name, i)).string();
 }
 
 std::vector<std::string> exportOctaves(const Grid& g, const perlin2D::NoiseConfig& c,

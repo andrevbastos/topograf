@@ -1,0 +1,11 @@
+// espera: noise C = (- (+ A (* B 2)) 1)
+// espera: noise D = (- (- A B) C)
+// espera: noise E = (* (+ A B) 2)
+// espera: noise F = (/ (* A 2) 3)
+terrain(width: 8, length: 8);
+perlin A(seed: 1);
+perlin B(seed: 2);
+noise C = A + B * 2 - 1;
+noise D = A - B - C;
+noise E = (A + B) * 2;
+noise F = A * 2 / 3;

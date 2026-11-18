@@ -1,3 +1,0 @@
-// espera: linha 3, coluna 21: erro sintático: encontrado ( inesperado, esperado em
-terreno(width: 8, length: 8);
-exportar oitavas max(A, B) em "out/";

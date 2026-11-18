@@ -71,14 +71,14 @@ struct Header {
     Loc loc;
 };
 
-// ruido X(params);
+// perlin X(params);
 struct PrimitiveDecl {
     std::string name;
     std::vector<Param> params;
     Loc loc;
 };
 
-// ruido X = expr;
+// noise X = expr;
 struct CompositeDecl {
     std::string name;
     ExprPtr expr;
@@ -96,14 +96,14 @@ struct Display {
     Loc loc;
 };
 
-// exportar X como "f.png";
+// export X as "f.png";
 struct Export {
     std::string name;
     std::string path;
     Loc loc;
 };
 
-// exportar oitavas X em "dir/";
+// export octaves X to "dir/";
 struct ExportOctaves {
     std::string name;
     std::string dir;

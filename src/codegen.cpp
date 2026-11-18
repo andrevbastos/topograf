@@ -51,8 +51,8 @@ std::string expr(const ast::Expr& e) {
         case K::Call: {
             const auto& a = *e.children[0];
             const auto& b = *e.children[1];
-            if (e.name == "mistura") {
-                return std::format("prt::mistura({}, {}, {}, {})", expr(a), expr(b),
+            if (e.name == "mix") {
+                return std::format("prt::mix({}, {}, {}, {})", expr(a), expr(b),
                                    num(e.children[2]->number), num(e.children[3]->number));
             }
             return std::format("prt::{}({}, {})", e.name, expr(a), expr(b));
@@ -62,20 +62,20 @@ std::string expr(const ast::Expr& e) {
 }
 
 const char* configField(const std::string& param) {
-    if (param == "frequencia") return "freq";
-    if (param == "oitavas") return "octaves";
-    if (param == "semente") return "seed";
-    if (param == "persistencia") return "pers";
-    if (param == "lacunaridade") return "lac";
+    if (param == "frequency") return "freq";
+    if (param == "octaves") return "octaves";
+    if (param == "seed") return "seed";
+    if (param == "persistence") return "pers";
+    if (param == "lacunarity") return "lac";
     if (param == "amplitude") return "amp";
-    if (param == "expoente") return "exp";
-    if (param == "onda") return "wave";
+    if (param == "exponent") return "exp";
+    if (param == "wave") return "wave";
     throw std::logic_error("parâmetro sem geração de código: " + param);
 }
 
 const char* configCast(const std::string& param) {
-    if (param == "oitavas" || param == "semente") return "static_cast<unsigned>";
-    if (param == "onda") return "static_cast<int>";
+    if (param == "octaves" || param == "seed") return "static_cast<unsigned>";
+    if (param == "wave") return "static_cast<int>";
     return "static_cast<float>";
 }
 
@@ -112,26 +112,26 @@ std::string generateCpp(const ast::Program& program, const sema::Result& /*sem*/
         std::visit([&](const auto& c) {
             using T = std::decay_t<decltype(c)>;
             if constexpr (std::is_same_v<T, ast::PrimitiveDecl>) {
-                out << std::format("\n    // linha {}: ruido {}(...)\n", c.loc.line, c.name)
+                out << std::format("\n    // linha {}: perlin {}(...)\n", c.loc.line, c.name)
                     << std::format("    perlin2D::NoiseConfig {} = prt::config(g);\n", cfg(c.name));
                 for (const auto& p : c.params) {
                     out << std::format("    {}.{} = {}({});\n", cfg(c.name), configField(p.name), configCast(p.name), p.value);
                 }
                 out << std::format("    const prt::Field {} = perlin2D::generateNoiseMap({});\n", var(c.name), cfg(c.name));
             } else if constexpr (std::is_same_v<T, ast::CompositeDecl>) {
-                out << std::format("\n    // linha {}: ruido {} = {}\n", c.loc.line, c.name, ast::dump(*c.expr))
+                out << std::format("\n    // linha {}: noise {} = {}\n", c.loc.line, c.name, ast::dump(*c.expr))
                     << std::format("    prt::Field {}(N);\n", var(c.name))
                     << std::format("    for (std::size_t i = 0; i < N; ++i) {}[i] = {};\n", var(c.name), expr(*c.expr));
             } else if constexpr (std::is_same_v<T, ast::Export>) {
-                out << std::format("\n    // linha {}: exportar {} como {}\n", c.loc.line, c.name, str(c.path))
+                out << std::format("\n    // linha {}: export {} as {}\n", c.loc.line, c.name, str(c.path))
                     << std::format("    if (auto e = prt::exportPNG(g, {}, {}, {})) report(*e);\n",
                                    var(c.name), str(c.path), c.loc.line);
             } else if constexpr (std::is_same_v<T, ast::ExportOctaves>) {
-                out << std::format("\n    // linha {}: exportar oitavas {} em {}\n", c.loc.line, c.name, str(c.dir))
+                out << std::format("\n    // linha {}: export octaves {} to {}\n", c.loc.line, c.name, str(c.dir))
                     << std::format("    for (const auto& e : prt::exportOctaves(g, {}, {}, {}, {})) report(e);\n",
                                    cfg(c.name), str(c.dir), str(c.name), c.loc.line);
             } else if constexpr (std::is_same_v<T, ast::Display>) {
-                // D10: displays depois de todos os exportar.
+                // D10: displays depois de todos os export.
                 hasDisplay = true;
                 displays << std::format("        // linha {}\n", c.loc.line)
                          << std::format("        displays.push_back({{{}, {{\n", c.loc.line);

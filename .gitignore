@@ -68,3 +68,4 @@ GEMINI.md
 # Evitar commitar configurações de teste locais (se houver)
 config.local.json
 secrets.json
+exemplos/

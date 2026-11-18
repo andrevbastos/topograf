@@ -1,0 +1,10 @@
+// espera: linha 9, coluna 10: erro semântico: parâmetro desconhecido 'escala' em perlin A
+// espera: linha 9, coluna 21: erro semântico: 'width' não pode ser definido em perlin
+// espera: linha 9, coluna 31: erro semântico: 'octaves' deve ser >= 1 (recebeu 0)
+// espera: linha 10, coluna 10: erro semântico: 'seed' deve ser inteiro (recebeu 1.5)
+// espera: linha 10, coluna 21: erro semântico: 'frequency' deve ser > 0 (recebeu 0)
+// espera: linha 10, coluna 35: erro semântico: 'persistence' deve ser > 0 (recebeu 0)
+// espera: 6 erro(s) semântico(s)
+terrain(width: 8, length: 8);
+perlin A(escala: 4, width: 8, octaves: 0);
+perlin B(seed: 1.5, frequency: 0, persistence: 0);

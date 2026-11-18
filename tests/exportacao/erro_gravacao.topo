@@ -1,0 +1,5 @@
+// espera: linha 5: erro de execução
+// codigo: 1
+terrain(width: 4, length: 4);
+perlin A(seed: 1);
+export A as "/proc/nao_existe/a.png";

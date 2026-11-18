@@ -31,14 +31,15 @@
 %define api.token.prefix {TOK_}
 %token
     END 0           "fim do arquivo"
-    TERRENO         "terreno"
-    RUIDO           "ruido"
+    TERRAIN         "terrain"
+    PERLIN          "perlin"
+    NOISE           "noise"
     DISPLAY         "display"
-    EXPORTAR        "exportar"
-    COMO            "como"
-    EM              "em"
-    OITAVAS         "oitavas"
-    PROFUNDIDADE    "profundidade"
+    EXPORT          "export"
+    AS              "as"
+    TO              "to"
+    OCTAVES         "octaves"
+    DEPTH           "depth"
     PLUS            "+"
     MINUS           "-"
     STAR            "*"
@@ -75,7 +76,7 @@ programa
     ;
 
 cabecalho
-    : "terreno" "(" params ")" ";"
+    : "terrain" "(" params ")" ";"
         { drv.program.header = ast::Header{std::move($3), L(@1)}; }
     ;
 
@@ -85,15 +86,15 @@ comandos
     ;
 
 comando
-    : "ruido" IDENT "(" params ")" ";"
+    : "perlin" IDENT "(" params ")" ";"
         { drv.program.commands.emplace_back(ast::PrimitiveDecl{std::move($2), std::move($4), L(@1)}); }
-    | "ruido" IDENT "=" expr ";"
+    | "noise" IDENT "=" expr ";"
         { drv.program.commands.emplace_back(ast::CompositeDecl{std::move($2), std::move($4), L(@1)}); }
     | "display" camadas opt_prof ";"
         { drv.program.commands.emplace_back(ast::Display{std::move($2), $3, L(@1)}); }
-    | "exportar" IDENT "como" STRING ";"
+    | "export" IDENT "as" STRING ";"
         { drv.program.commands.emplace_back(ast::Export{std::move($2), std::move($4), L(@1)}); }
-    | "exportar" "oitavas" IDENT "em" STRING ";"
+    | "export" "octaves" IDENT "to" STRING ";"
         { drv.program.commands.emplace_back(ast::ExportOctaves{std::move($3), std::move($5), L(@1)}); }
     ;
 
@@ -106,10 +107,10 @@ param
     : nome_param ":" NUMERO { $$ = ast::Param{std::move($1), $3, L(@1)}; }
     ;
 
-/* `oitavas` é palavra-chave e também nome de parâmetro (D12). */
+/* `octaves` é palavra-chave e também nome de parâmetro (D12). */
 nome_param
     : IDENT                 { $$ = std::move($1); }
-    | "oitavas"             { $$ = "oitavas"; }
+    | "octaves"             { $$ = "octaves"; }
     ;
 
 expr
@@ -142,10 +143,10 @@ opt_cor
     | COR                   { $$ = $1; }
     ;
 
-/* No máximo um `profundidade` por display (D16). */
+/* No máximo um `depth` por display (D16). */
 opt_prof
     : %empty                { $$ = false; }
-    | "profundidade"        { $$ = true; }
+    | "depth"               { $$ = true; }
     ;
 
 %%

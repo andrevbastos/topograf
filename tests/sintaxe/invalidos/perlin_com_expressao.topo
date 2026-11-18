@@ -1,0 +1,5 @@
+// perlin declara só primitivos: composto com perlin é erro sintático.
+// espera: linha 5, coluna 10: erro sintático: encontrado = inesperado, esperado (
+terrain(width: 8, length: 8);
+perlin A(seed: 1);
+perlin B = A + 0.1;

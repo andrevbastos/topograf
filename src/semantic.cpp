@@ -19,7 +19,7 @@ struct Builtin {
 };
 
 constexpr std::array<Builtin, 6> builtins {{
-    {"max", 2}, {"min", 2}, {"acima", 2}, {"abaixo", 2}, {"media", 2}, {"mistura", 4},
+    {"max", 2}, {"min", 2}, {"above", 2}, {"below", 2}, {"avg", 2}, {"mix", 4},
 }};
 
 const Builtin* findBuiltin(const std::string& name) {
@@ -106,11 +106,11 @@ private:
             if (p.name == "width" || p.name == "length" || p.name == "height") {
                 if (checkInteger(p, INT_MAX)) checkPositive(p);
             } else {
-                error(p.loc, std::format("parâmetro desconhecido '{}' em terreno (aceitos: width, length, height)", p.name));
+                error(p.loc, std::format("parâmetro desconhecido '{}' em terrain (aceitos: width, length, height)", p.name));
             }
         }
         for (const char* required : {"width", "length"}) {
-            if (!names.contains(required)) error(h.loc, std::format("terreno sem '{}' (obrigatório)", required));
+            if (!names.contains(required)) error(h.loc, std::format("terrain sem '{}' (obrigatório)", required));
         }
         hasHeight = names.contains("height");
     }
@@ -134,35 +134,35 @@ private:
     void check(const ast::PrimitiveDecl& d) {
         checkDuplicates(d.params);
         for (const auto& p : d.params) {
-            if (p.name == "frequencia" || p.name == "persistencia" || p.name == "lacunaridade" ||
-                p.name == "amplitude" || p.name == "expoente") {
+            if (p.name == "frequency" || p.name == "persistence" || p.name == "lacunarity" ||
+                p.name == "amplitude" || p.name == "exponent") {
                 checkPositive(p);
-            } else if (p.name == "onda") {
+            } else if (p.name == "wave") {
                 if (checkInteger(p, INT_MAX)) checkPositive(p);
-            } else if (p.name == "oitavas") {
+            } else if (p.name == "octaves") {
                 if (checkInteger(p, UINT_MAX) && p.value < 1) {
-                    error(p.loc, std::format("'oitavas' deve ser >= 1 (recebeu {})", num(p.value)));
+                    error(p.loc, std::format("'octaves' deve ser >= 1 (recebeu {})", num(p.value)));
                 }
-            } else if (p.name == "semente") {
+            } else if (p.name == "seed") {
                 checkInteger(p, UINT_MAX);  // NUMERO não tem sinal: >= 0 garantido
             } else if (p.name == "width" || p.name == "length" || p.name == "height") {
-                error(p.loc, std::format("'{}' não pode ser definido em ruido; as dimensões vêm de terreno", p.name));
+                error(p.loc, std::format("'{}' não pode ser definido em perlin; as dimensões vêm de terrain", p.name));
             } else {
-                error(p.loc, std::format("parâmetro desconhecido '{}' em ruido {} "
-                                         "(aceitos: frequencia, oitavas, semente, persistencia, lacunaridade, amplitude, expoente, onda)", p.name, d.name));
+                error(p.loc, std::format("parâmetro desconhecido '{}' em perlin {} "
+                                         "(aceitos: frequency, octaves, seed, persistence, lacunarity, amplitude, exponent, wave)", p.name, d.name));
             }
         }
         declare(d.name, d.loc, {d.name, Symbol::Kind::Primitive, d.loc.line, &d, nullptr});
     }
 
     void check(const ast::CompositeDecl& d) {
-        // A expressão é analisada antes de declarar: `ruido C = C + A` é uso antes da declaração.
+        // A expressão é analisada antes de declarar: `noise C = C + A` é uso antes da declaração.
         checkExpr(*d.expr);
         declare(d.name, d.loc, {d.name, Symbol::Kind::Composite, d.loc.line, nullptr, &d});
     }
 
     void check(const ast::Display& d) {
-        if (!hasHeight) error(d.loc, "display exige 'height' em terreno");  // T11
+        if (!hasHeight) error(d.loc, "display exige 'height' em terrain");  // T11
         for (const auto& layer : d.layers) checkExpr(*layer.expr);
     }
 
@@ -174,7 +174,7 @@ private:
     void check(const ast::ExportOctaves& e) {
         const Symbol* s = lookup(e.name, e.loc);
         if (s && s->kind != Symbol::Kind::Primitive) {
-            error(e.loc, std::format("'exportar oitavas' exige um ruído primitivo; '{}' é composto", e.name));
+            error(e.loc, std::format("'export octaves' exige um ruído primitivo (perlin); '{}' é composto (noise)", e.name));
         }
     }
 
@@ -234,7 +234,7 @@ private:
             if (result.symbols.contains(e.name)) {
                 error(e.loc, std::format("'{}' é um ruído, não uma função", e.name));
             } else {
-                error(e.loc, std::format("função desconhecida '{}' (disponíveis: max, min, acima, abaixo, media, mistura)", e.name));
+                error(e.loc, std::format("função desconhecida '{}' (disponíveis: max, min, above, below, avg, mix)", e.name));
             }
             return;
         }
@@ -242,16 +242,16 @@ private:
             error(e.loc, std::format("'{}' espera {} argumentos, recebeu {}", e.name, b->arity, e.children.size()));
             return;
         }
-        if (e.name == "mistura") {
+        if (e.name == "mix") {
             bool literals = true;
             for (std::size_t i = 2; i < 4; ++i) {
                 if (!isLiteral(*e.children[i])) {
-                    error(e.children[i]->loc, std::format("argumento {} de 'mistura' deve ser número literal", i + 1));
+                    error(e.children[i]->loc, std::format("argumento {} de 'mix' deve ser número literal", i + 1));
                     literals = false;
                 }
             }
             if (literals && e.children[2]->number + e.children[3]->number == 0.0) {
-                error(e.loc, "'mistura' com pesos 0 e 0 (a soma dos pesos deve ser > 0)");
+                error(e.loc, "'mix' com pesos 0 e 0 (a soma dos pesos deve ser > 0)");
             }
         }
     }

@@ -1,2 +1,0 @@
-// espera: linha 2, coluna 16: erro sintático: encontrado identificador inesperado, esperado número
-terreno(width: A, length: 8);

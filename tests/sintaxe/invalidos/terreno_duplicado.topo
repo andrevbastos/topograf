@@ -1,0 +1,3 @@
+// espera: linha 3, coluna 1: erro sintático: encontrado terrain inesperado
+terrain(width: 8, length: 8);
+terrain(width: 8, length: 8);

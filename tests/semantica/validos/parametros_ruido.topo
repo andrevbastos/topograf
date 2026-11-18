@@ -1,0 +1,5 @@
+// espera: A primitivo linha 4 (frequency: 2, octaves: 5, seed: 9, persistence: 0.4, lacunarity: 2.5, amplitude: 1.2, exponent: 1.5, wave: 120)
+// espera: B primitivo linha 5 (wave: 1)
+terrain(width: 8, length: 8);
+perlin A(frequency: 2, octaves: 5, seed: 9, persistence: 0.4, lacunarity: 2.5, amplitude: 1.2, exponent: 1.5, wave: 120);
+perlin B(wave: 1);

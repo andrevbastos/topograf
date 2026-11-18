@@ -1,0 +1,18 @@
+// Programas rejeitados do handoff (seção 8) que são erros semânticos.
+// espera: linha 14, coluna 21: erro semântico: '*' exige que ao menos um lado seja número literal
+// espera: linha 15, coluna 21: erro semântico: divisão não suportada
+// espera: linha 16, coluna 1: erro semântico: 'export octaves' exige um ruído primitivo (perlin); 'anel' é composto (noise)
+// espera: linha 17, coluna 11: erro semântico: 'mix' com pesos 0 e 0
+// espera: linha 18, coluna 1: erro semântico: display exige 'height' em terrain
+// espera: 5 erro(s) semântico(s)
+terrain(width: 256, length: 256);
+perlin montanhao(frequency: 0.5, octaves: 2, seed: 1);
+perlin cadeia(frequency: 4.0, octaves: 6, seed: 42);
+perlin A(seed: 3);
+perlin B(seed: 4);
+noise anel = cadeia - montanhao;
+noise x = montanhao * cadeia;
+noise y = montanhao / cadeia;
+export octaves anel to "x/";
+noise z = mix(A, B, 0, 0);
+display anel;

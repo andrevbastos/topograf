@@ -56,11 +56,17 @@ int showOne(const Grid& g, const DisplaySpec& d, int frames) {
     const int L = g.length;
     const int H = g.height;
 
-    // Malhas de cada camada (CPU), antes de abrir a janela (D1, D8).
+    // Malhas de cada camada (CPU), antes de abrir a janela (D1, D8). O Marching
+    // Cubes de cada camada é dividido em fatias de z entre as workers.
+    //
+    // O pool não é destruído: ~TaskMaster destrói mtx/cv antes do join das
+    // workers (membros destruídos em ordem inversa, `workers` é o primeiro), o que
+    // é UB. O filho termina com _exit, então as workers ociosas só somem com ele.
+    auto* tm = new TaskMaster();
     std::vector<std::pair<std::vector<Vertex>, std::vector<GLuint>>> layers;
     for (std::size_t i = 0; i < d.layers.size(); ++i) {
         const Field field = d.layers[i].field();
-        auto data = getMarchingCubeData(field, W, H, L, toColor(d.layers[i].color), d.depth);
+        auto data = getMarchingCubeDataParallel(*tm, field, W, H, L, toColor(d.layers[i].color), d.depth);
         if (data.first.empty()) {
             std::cerr << std::format("display linha {}: camada {} sem malha "
                                      "(width, length e height precisam ser >= 2)\n", d.line, i + 1);

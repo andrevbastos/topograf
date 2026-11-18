@@ -1,4 +1,0 @@
-// espera: linha 4, coluna 17: erro léxico: string sem fechamento
-terreno(width: 8, length: 8);
-ruido A(semente: 1);
-exportar A como "a.png;

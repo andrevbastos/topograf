@@ -46,15 +46,15 @@ std::string dump(const Expr& e) {
 
 std::string dump(const Program& p) {
     std::ostringstream out;
-    out << "terreno(" << params(p.header.params) << ")\n";
+    out << "terrain(" << params(p.header.params) << ")\n";
 
     for (const auto& cmd : p.commands) {
         std::visit([&](const auto& c) {
             using T = std::decay_t<decltype(c)>;
             if constexpr (std::is_same_v<T, PrimitiveDecl>) {
-                out << "ruido " << c.name << "(" << params(c.params) << ")";
+                out << "perlin " << c.name << "(" << params(c.params) << ")";
             } else if constexpr (std::is_same_v<T, CompositeDecl>) {
-                out << "ruido " << c.name << " = " << dump(*c.expr);
+                out << "noise " << c.name << " = " << dump(*c.expr);
             } else if constexpr (std::is_same_v<T, Display>) {
                 out << "display ";
                 for (std::size_t i = 0; i < c.layers.size(); ++i) {
@@ -62,11 +62,11 @@ std::string dump(const Program& p) {
                     out << dump(*c.layers[i].expr);
                     if (c.layers[i].color) out << color(*c.layers[i].color);
                 }
-                if (c.depth) out << " profundidade";
+                if (c.depth) out << " depth";
             } else if constexpr (std::is_same_v<T, Export>) {
-                out << "exportar " << c.name << " como \"" << c.path << "\"";
+                out << "export " << c.name << " as \"" << c.path << "\"";
             } else if constexpr (std::is_same_v<T, ExportOctaves>) {
-                out << "exportar oitavas " << c.name << " em \"" << c.dir << "\"";
+                out << "export octaves " << c.name << " to \"" << c.dir << "\"";
             }
             out << "  @" << c.loc.line << "\n";
         }, cmd);
